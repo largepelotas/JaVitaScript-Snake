@@ -43,7 +43,7 @@ test: $(BUILD)/test_core $(BUILD)/test_input $(BUILD)/test_score $(BUILD)/replay
 	@$(BUILD)/test_core
 	@$(BUILD)/test_input
 	@$(BUILD)/test_score
-	@tests/run_replays.sh $(BUILD)/replay
+	@bash tests/run_replays.sh $(BUILD)/replay
 
 $(BUILD):
 	@mkdir -p $(BUILD)
