@@ -1,4 +1,4 @@
-# Vita Snake
+# JaVitascript Snake
 
 A PS Vita homebrew port of [patorjk's JavaScript Snake](https://patorjk.com/games/snake/),
 built for a hacked Vita running Ensō / HENkaku / h-encore.
