@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+	Copied from $VITASDK/share/gcc-arm-vita-eabi/samples/hello_world and left
+	as-is (PLAN.md 7.3 says copy a working template, do not author one). Style
+	"a1" is the plain one-gate layout: a background and the launch gate, no
+	live frames, which is all v1 needs.
+-->
+<livearea style="a1" format-ver="01.00" content-rev="1">
+	<livearea-background>
+		<image>bg.png</image>
+	</livearea-background>
+
+	<gate>
+		<startup-image>startup.png</startup-image>
+	</gate>
+</livearea>

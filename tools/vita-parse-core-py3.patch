@@ -1,0 +1,104 @@
+diff --git a/elf.py b/elf.py
+index 49aa31b..011816b 100644
+--- a/elf.py
++++ b/elf.py
+@@ -1,11 +1,10 @@
+-from elftools.common.py3compat import str2bytes, bytes2str
+ from elftools.elf.elffile import ELFFile
+ 
+ from sys import argv
+ from collections import defaultdict
+ import subprocess
+ 
+-from util import u16, u32, c_str, hexdump
++from util import u16, u32, c_str, hexdump, str2bytes, bytes2str
+ from indent import indent, iprint
+ 
+ 
+@@ -84,4 +83,4 @@ class ElfParser():
+         self.a2l.stdin.write(str2bytes(hex(addr) + "\n"))
+         self.a2l.stdin.flush()
+         out = self.a2l.stdout.readline()
+-        return out.strip()
++        return bytes2str(out).strip()
+diff --git a/util.py b/util.py
+index 80ff7b3..b65b411 100644
+--- a/util.py
++++ b/util.py
+@@ -1,44 +1,48 @@
+-from elftools.common.py3compat import str2bytes
+-
+ import string
+ import struct
+ 
+ 
++def as_bytes(buf):
++    """The core file gives us bytes; Python 2 gave str. Accept either."""
++    if isinstance(buf, str):
++        return buf.encode("latin-1")
++    return bytes(buf)
++
++
++def bytes2str(buf):
++    return buf.decode("latin-1") if isinstance(buf, bytes) else buf
++
++
++def str2bytes(s):
++    return s.encode("latin-1") if isinstance(s, str) else s
++
++
+ def u16(buf, off):
+-    buf = buf[off:off+2]
+-    try:
+-        buf = str2bytes(buf)
+-    except AttributeError:
+-        pass
+-    return struct.unpack("<H", buf)[0]
++    return struct.unpack("<H", as_bytes(buf[off:off + 2]))[0]
+ 
+ 
+ def u32(buf, off):
+-    buf = buf[off:off+4]
+-    try:
+-        buf = str2bytes(buf)
+-    except AttributeError:
+-        pass
+-    return struct.unpack("<I", buf)[0]
++    return struct.unpack("<I", as_bytes(buf[off:off + 4]))[0]
+ 
+ 
+ def c_str(buf, off):
+-    out = ""
+-    while off < len(buf) and buf[off] != '\0':
+-        out += buf[off]
+-        off += 1
+-    return out
++    buf = as_bytes(buf)
++    end = buf.find(b"\0", off)
++    if end < 0:
++        end = len(buf)
++    return bytes2str(buf[off:end])
+ 
+ 
+ def hexdump(src, length=16, sep='.'):
+-    DISPLAY = string.digits + string.letters + string.punctuation
+-    FILTER = ''.join(((x if x in DISPLAY else '.') for x in map(chr, range(256))))
++    src = as_bytes(src)
++    display = string.digits + string.ascii_letters + string.punctuation
++    filt = ''.join((chr(x) if chr(x) in display else '.') for x in range(256))
+     lines = []
+-    for c in xrange(0, len(src), length):
+-        chars = src[c:c+length]
+-        hex = ' '.join(["%02x" % ord(x) for x in chars])
+-        if len(hex) > 24:
+-            hex = "%s %s" % (hex[:24], hex[24:])
+-        printable = ''.join(["%s" % FILTER[ord(x)] for x in chars])
+-        lines.append("%08x:  %-*s  |%s|\n" % (c, length*3, hex, printable))
++    for c in range(0, len(src), length):
++        chars = src[c:c + length]
++        hexed = ' '.join("%02x" % x for x in chars)
++        if len(hexed) > 24:
++            hexed = "%s %s" % (hexed[:24], hexed[24:])
++        printable = ''.join(filt[x] for x in chars)
++        lines.append("%08x:  %-*s  |%s|\n" % (c, length * 3, hexed, printable))
+     print(''.join(lines))

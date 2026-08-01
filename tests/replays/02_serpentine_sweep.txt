@@ -1,0 +1,61 @@
+# Serpentine sweep of the full 46x24 interior, one step per tick.
+# tick_ms == the mode's step_ms so every turn lands on an exact step.
+#
+# The tick carrying the starting press produces two steps (the press moves
+# immediately, then that tick's game_tick also runs), so after tick t the
+# snake has taken t+1 steps. Turns are computed from that, not guessed.
+#
+# Long-running: hundreds of steps, many foods, growth, and dozens of turns.
+seed 0xFEEDFACE
+mode hard
+tick_ms 50
+at 0 CONFIRM
+at 1 RIGHT
+at 44 DOWN
+at 45 LEFT
+at 90 DOWN
+at 91 RIGHT
+at 136 DOWN
+at 137 LEFT
+at 182 DOWN
+at 183 RIGHT
+at 228 DOWN
+at 229 LEFT
+at 274 DOWN
+at 275 RIGHT
+at 320 DOWN
+at 321 LEFT
+at 366 DOWN
+at 367 RIGHT
+at 412 DOWN
+at 413 LEFT
+at 458 DOWN
+at 459 RIGHT
+at 504 DOWN
+at 505 LEFT
+at 550 DOWN
+at 551 RIGHT
+at 596 DOWN
+at 597 LEFT
+at 642 DOWN
+at 643 RIGHT
+at 688 DOWN
+at 689 LEFT
+at 734 DOWN
+at 735 RIGHT
+at 780 DOWN
+at 781 LEFT
+at 826 DOWN
+at 827 RIGHT
+at 872 DOWN
+at 873 LEFT
+at 918 DOWN
+at 919 RIGHT
+at 964 DOWN
+at 965 LEFT
+at 1010 DOWN
+at 1011 RIGHT
+run 1116
+expect_state DEAD
+expect_length 6
+expect_hash 0x3D5AC737
