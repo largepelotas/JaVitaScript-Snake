@@ -58,6 +58,12 @@ Player-visible differences:
 - **Difficulty persists.** The original does not remember the choice across a
   reload; saving it is a handheld affordance.
 
+## Installing (no build required)
+
+Grab `snake.vpk` from the [Releases page](../../releases) and install it with
+VitaShell. A new release is built automatically whenever a `vX.Y.Z` tag is
+pushed (see `.github/workflows/release-vita.yml`).
+
 ## Building
 
 ### Host (desktop, for development and testing)

@@ -1,0 +1,48 @@
+name: Release Vita build
+
+# Tag a commit `v1.0.0` (etc.) and push the tag to build snake.vpk against
+# VitaSDK and attach it to a GitHub Release, so players can install without
+# building from source.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-vita:
+    runs-on: ubuntu-latest
+    container: vitasdk/vitasdk:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SDL2 packages via vdpm
+        run: |
+          vdpm sdl2
+          vdpm sdl2_ttf
+
+      - name: Configure
+        run: cmake -B build-vita -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake
+
+      - name: Build
+        run: cmake --build build-vita
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snake-vpk
+          path: build-vita/snake.vpk
+
+  release:
+    needs: build-vita
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: snake-vpk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: snake.vpk
+          generate_release_notes: true
