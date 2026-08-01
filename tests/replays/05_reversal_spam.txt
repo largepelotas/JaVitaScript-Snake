@@ -1,0 +1,75 @@
+# Reversal stress: the opposite direction is pressed on nearly every tick.
+# Each one must be rejected, so the snake runs the full length of each lane
+# and only dies at a far wall. A single accepted reversal would end the run
+# within a few ticks instead, which is exactly what this pins down.
+seed 0xBADC0DE
+mode medium
+tick_ms 75
+at 0 CONFIRM
+at 1 RIGHT
+at 2 LEFT
+at 3 RIGHT
+at 4 LEFT
+at 5 RIGHT
+at 6 LEFT
+at 7 RIGHT
+at 8 LEFT
+at 9 RIGHT
+at 10 LEFT
+at 11 RIGHT
+at 12 LEFT
+at 13 RIGHT
+at 14 LEFT
+at 15 RIGHT
+at 16 LEFT
+at 17 RIGHT
+at 18 LEFT
+at 19 RIGHT
+at 20 LEFT
+at 21 DOWN
+at 22 UP
+at 23 DOWN
+at 24 UP
+at 25 DOWN
+at 26 UP
+at 27 DOWN
+at 28 UP
+at 29 DOWN
+at 30 UP
+at 31 DOWN
+at 32 UP
+at 33 DOWN
+at 34 UP
+at 35 DOWN
+at 36 UP
+at 37 DOWN
+at 38 UP
+at 39 DOWN
+at 40 UP
+at 41 RIGHT
+at 42 LEFT
+at 43 RIGHT
+at 44 LEFT
+at 45 RIGHT
+at 46 LEFT
+at 47 RIGHT
+at 48 LEFT
+at 49 RIGHT
+at 50 LEFT
+at 51 RIGHT
+at 52 LEFT
+at 53 RIGHT
+at 54 LEFT
+at 55 RIGHT
+at 56 LEFT
+at 57 RIGHT
+at 58 LEFT
+at 59 RIGHT
+at 60 LEFT
+at 61 RIGHT
+at 62 LEFT
+at 63 RIGHT
+run 80
+expect_state DEAD
+expect_length 1
+expect_hash 0x87949CCD

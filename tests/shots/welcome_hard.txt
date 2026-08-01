@@ -1,0 +1,15 @@
+# The welcome screen after the difficulty has been cycled (PLAN.md 5.3).
+#
+# Square is the only way to reach a non-default difficulty on the Vita, and the
+# welcome dialog is the only place that shows one, so this is the picture that
+# proves the two agree. Starting from easy and cycling twice also exercises the
+# wrap: easy -> medium -> hard.
+seed 1
+mode easy
+tick_ms 16
+at 0 CYCLE_MODE
+at 1 CYCLE_MODE
+run 2
+expect_state WELCOME
+expect_length 1
+expect_hash 0x2C17D1DA

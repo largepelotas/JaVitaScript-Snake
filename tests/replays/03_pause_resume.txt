@@ -1,0 +1,14 @@
+# Pause mid-run and resume. The pause must consume time without advancing, so
+# the final position depends on the unpaused ticks only.
+seed 42
+mode easy
+tick_ms 16
+at 0 CONFIRM
+at 1 RIGHT
+at 20 PAUSE
+at 200 PAUSE
+at 210 DOWN
+run 400
+expect_state DEAD
+expect_length 6
+expect_hash 0x5FF34168

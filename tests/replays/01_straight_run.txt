@@ -1,0 +1,11 @@
+# Baseline: confirm, head right, run into the far wall.
+# Pins the opening sequence and the wall-death boundary.
+seed 0x1234ABCD
+mode medium
+tick_ms 16
+at 0 CONFIRM
+at 1 RIGHT
+run 400
+expect_state DEAD
+expect_length 1
+expect_hash 0xF3FFB5BA
