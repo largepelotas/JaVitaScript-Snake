@@ -88,7 +88,18 @@
  * comes from the mode table, so adding a mode stays a data change.
  */
 #define TXT_DIFFICULTY "Difficulty: %s - SQUARE to change"
+/*
+ * Same shape as the difficulty line, for the same reason: the original picks
+ * its theme from a dropdown (`index.html:90-104`) with no Vita equivalent.
+ * Kept this short deliberately - the content column is DIALOG_CONTENT_W (300px)
+ * and "Theme: Original by DylanLCrocker - TRIANGLE to change" does not fit at
+ * 14px, so the author goes on its own line below (PLAN-THEMES.md 6).
+ */
+#define TXT_THEME      "Theme: %s - TRIANGLE to change"
 #define TXT_CREDIT     "Based on JavaScript Snake by Patrick Gillespie, MIT licensed."
+/* These are other people's contributions to an MIT project and the reference
+ * credits each by name in its dropdown, so this port does too. */
+#define TXT_THEME_BY   "%s theme by %s"
 #define TXT_DIED       "You died :("
 #define TXT_WON        "You win! :D"
 #define TXT_AGAIN      "Play Again?"
@@ -102,7 +113,7 @@
 
 static const Theme g_themes[] = {
     {
-        "main", "patorjk",      /* main-snake.css                       */
+        "Main", "patorjk",      /* main-snake.css                       */
         RGB(0xFC, 0x54, 0x54), /* background    body #fc5454            */
         RGB(0x00, 0x00, 0xA8), /* playfield     .snake-playing-field    */
         RGB(0xFC, 0xFC, 0x54), /* snake         snakeblock.png interior */
@@ -117,7 +128,7 @@ static const Theme g_themes[] = {
         RGB(0xFF, 0xFF, 0xFF)  /* button_border                         */
     },
     {
-        "matrix", "Geahad Haymor", /* matrix-snake.css                  */
+        "Matrix", "Geahad Haymor", /* matrix-snake.css                  */
         RGB(0x00, 0xFF, 0x11), /* background    :1 body                 */
         RGB(0x00, 0x00, 0x00), /* playfield     :54                     */
         RGB(0x00, 0xC8, 0x48), /* snake         matrix-snake-block.png  */
@@ -132,7 +143,7 @@ static const Theme g_themes[] = {
         RGB(0x00, 0xFF, 0x11)  /* button_border                         */
     },
     {
-        "original", "DylanLCrocker", /* blue-snake.css                  */
+        "Original", "DylanLCrocker", /* blue-snake.css                  */
         RGB(0x00, 0x46, 0x20), /* background    :1 rgb(0,70,32)         */
         RGB(0x14, 0x9C, 0x36), /* playfield     :58 rgb(20,156,54)      */
         RGB(0xFC, 0xFC, 0x54), /* snake         shared snakeblock.png   */
@@ -315,8 +326,13 @@ static void draw_hud(SDL_Renderer *r, RenderCtx *rc, const Theme *th,
 
 /*
  * Welcome dialog. Height is auto in the original, so the box is sized from its
- * wrapped content: title, paragraph break, instructions, paragraph break,
- * button, then the derivative-work credit (PLAN.md 1.5).
+ * wrapped content: title, paragraph break, instructions, difficulty, theme,
+ * paragraph break, button, then the derivative-work credit and the theme's own
+ * credit (PLAN.md 1.5, PLAN-THEMES.md 6).
+ *
+ * The box grows on its own because content_h is computed from the same parts
+ * that are then drawn - the two lines this gained cost one term each here and
+ * nothing in MECHANICS 9's geometry, which fixes only the width.
  */
 static void draw_welcome(SDL_Renderer *r, RenderCtx *rc, const Theme *th,
                          const GameState *g)
@@ -326,19 +342,26 @@ static void draw_welcome(SDL_Renderer *r, RenderCtx *rc, const Theme *th,
     int body_h = text_draw_wrapped(NULL, rc->font, TXT_WELCOME, 0, 0,
                                    DIALOG_CONTENT_W, th->overlay_text);
     int button_h = text_line_height(rc->font) + 2 * BUTTON_PAD_Y;
-    int content_h = line          /* title            */
-                    + line        /* paragraph break  */
+    int content_h = line          /* title             */
+                    + line        /* paragraph break   */
                     + body_h
-                    + line        /* difficulty       */
-                    + line        /* paragraph break  */
+                    + line        /* difficulty        */
+                    + line        /* theme             */
+                    + line        /* paragraph break   */
                     + button_h
                     + small       /* gap before credit */
-                    + small;      /* credit            */
+                    + small       /* credit            */
+                    + small;      /* theme credit      */
     int y = WELCOME_TOP + DIALOG_PAD;
     char difficulty[64];
+    char theme_line[64];
+    char theme_credit[96];
 
     snprintf(difficulty, sizeof difficulty, TXT_DIFFICULTY,
              mode_get(g->mode)->name);
+    snprintf(theme_line, sizeof theme_line, TXT_THEME, th->name);
+    snprintf(theme_credit, sizeof theme_credit, TXT_THEME_BY, th->name,
+             th->author);
 
     fill(r, th->overlay_bg, DIALOG_LEFT, WELCOME_TOP, DIALOG_BOX_W,
          content_h + 2 * DIALOG_PAD);
@@ -348,10 +371,14 @@ static void draw_welcome(SDL_Renderer *r, RenderCtx *rc, const Theme *th,
     y += text_draw_wrapped(r, rc->font, TXT_WELCOME, CENTER_X, y,
                            DIALOG_CONTENT_W, th->overlay_text);
     text_draw_center(r, rc->font, difficulty, CENTER_X, y, th->overlay_text);
+    y += line;
+    text_draw_center(r, rc->font, theme_line, CENTER_X, y, th->overlay_text);
     y += line + line;
     y += draw_button(r, rc, th, TXT_START, CENTER_X, y, th->overlay_text);
     y += small;
     text_draw_center(r, rc->small, TXT_CREDIT, CENTER_X, y, th->overlay_text);
+    y += small;
+    text_draw_center(r, rc->small, theme_credit, CENTER_X, y, th->overlay_text);
 }
 
 /* Death and win share one element in the original (`snake.js:966-969`): title,
