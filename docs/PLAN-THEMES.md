@@ -49,20 +49,23 @@ centre is the body colour and the mean is not.
 | `overlay_bg` | `#000000` | `#000000` | `#000000` |
 | `overlay_text` | `#FFFFFF` | `#00FF11` | `#FFFFFF` |
 | `overlay_text_end` (new) | `#FFFFFF` | `#FF0000` | `#FFFFFF` |
+| `pause_bg` (new) | `#000000` | `#000000` | `#004620` |
+| `pause_text` (new) | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` |
 | `button_border` | `#FFFFFF` | `#00FF11` | `#FFFFFF` |
 
 Provenance, per column:
 
-- **Main** — unchanged, already cited in `src/shell/render.c`.
+- **Main** — unchanged, already cited in `src/shell/render.c`; `pause_bg` and
+  `pause_text` from `main-snake.css:28-29`.
 - **Matrix** — `matrix-snake.css:1` body, `:54` playing field, `:29` panel,
-  `:63` welcome, `:69` end-game. `snake` is the centre of
+  `:63` welcome, `:69` end-game, `:25-26` pause screen. `snake` is the centre of
   `matrix-snake-block.png` (mean `#00C349`), `food` the centre of
   `matrix-food-block.png` (mean `#DA000C`). Dead blocks fall back to the shared
   `deadblock.png`, hence `#C0C0C0`.
 - **Original** — `blue-snake.css:1` body (`rgb(0,70,32)`), `:58` playing field
   (`rgb(20,156,54)`), `:52` food (`rgb(207,33,33)`), `:23` panel, `:63` and
-  `:69` dialogs. The body tile is the shared `snakeblock.png`, so the body is
-  the same yellow as Main.
+  `:69` dialogs, `:19-20` pause screen. The body tile is the shared
+  `snakeblock.png`, so the body is the same yellow as Main.
 
 One provenance note that does not change any value: Original sets
 `.snake-snakebody-block { background-color: #247FB4 }` (`blue-snake.css:41`),
@@ -73,17 +76,35 @@ deviation in §3.
 
 ## 3. Struct changes
 
-One new colour field, required by Matrix rather than speculative, plus the
-attribution string from §6:
+Three new colour fields, each required by a real theme rather than speculative,
+plus the attribution string from §6:
 
 ```c
-SDL_Color   overlay_text_end; /* Matrix's death/win dialogs are red */
-const char *author;           /* credited in the welcome dialog     */
+SDL_Color   overlay_text_end; /* Matrix's death/win dialogs are red   */
+SDL_Color   pause_bg;         /* Original's pause screen is not black */
+SDL_Color   pause_text;       /* Matrix's pause text is not its green */
+const char *author;           /* credited in the welcome dialog       */
 ```
 
-For the two themes that do not distinguish `overlay_text_end` from
-`overlay_text`, the new field simply repeats the old one — that is the point of
-a table.
+For themes that do not distinguish a new field from the old one it replaces, the
+table simply repeats the value — that is the point of a table.
+
+`pause_bg` and `pause_text` were missed when this plan was first written, and
+they are worth the space because `draw_paused` currently borrows `overlay_bg`
+and `overlay_text`, which is right for Main and wrong for both new themes.
+The reference styles `.snake-pause-screen` separately from the welcome and
+end-game dialogs, and all three disagree:
+
+| Theme | pause | welcome | end-game |
+|---|---|---|---|
+| Main | `#000000` / `#FFFFFF` | `#000000` / `#FFFFFF` | `#000000` / `#FFFFFF` |
+| Matrix | `#000000` / `#FFFFFF` | `#000000` / `#00FF11` | `#000000` / `#FF0000` |
+| Original | `#004620` / `#FFFFFF` | `#000000` / `#FFFFFF` | `#000000` / `#FFFFFF` |
+
+Matrix earns `pause_text` — its pause screen is white, not its dialog green.
+Original earns `pause_bg` — its pause screen is the same dark green as its body
+background, not black. Main needs neither, which is why the omission was
+invisible in v1.
 
 Note what this does **not** need: no change to `render_frame`'s drawing of the
 snake. With `snake_head` cut (§10), the board is still drawn purely from cell
