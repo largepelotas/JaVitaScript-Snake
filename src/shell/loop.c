@@ -194,7 +194,8 @@ static int run_headless(const char *script_path, const char *outdir, int theme,
  * chosen. An override is a session choice and is deliberately NOT written back:
  * only Square (or M on the desktop) changes what the save file holds.
  */
-static int run_windowed(int mode_override, uint32_t seed, int theme)
+/* mode_override and theme_override are -1 to mean "whatever was saved". */
+static int run_windowed(int mode_override, uint32_t seed, int theme_override)
 {
     SDL_Window   *win;
     SDL_Renderer *ren;
@@ -203,8 +204,9 @@ static int run_windowed(int mode_override, uint32_t seed, int theme)
     GameState     game;
     uint32_t      prev_ms;
     uint32_t      logged_buttons = 0;
-    int           saved_highscore, saved_mode;
+    int           saved_highscore, saved_mode, saved_theme;
     int           mode, cur_mode;
+    int           theme, cur_theme;
     bool          running = true;
 
     win = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED,
@@ -227,16 +229,22 @@ static int run_windowed(int mode_override, uint32_t seed, int theme)
         return 1;
     }
 
+    /* Read before render_init, because the record is what says which theme to
+     * open with. --theme still wins, and like --mode it is a one-session
+     * override: it is not written back, so it cannot silently change what the
+     * player had chosen on the device. */
+    score_load(&saved_highscore, &saved_mode, &saved_theme);
+    mode      = mode_override >= 0 ? mode_override : saved_mode;
+    cur_mode  = mode;
+    theme     = theme_override >= 0 ? theme_override : saved_theme;
+    cur_theme = theme;
+
     if (!render_init(&rc, theme)) {
         plat_log("render_init: %s", SDL_GetError());
         SDL_DestroyRenderer(ren);
         SDL_DestroyWindow(win);
         return 1;
     }
-
-    score_load(&saved_highscore, &saved_mode);
-    mode     = mode_override >= 0 ? mode_override : saved_mode;
-    cur_mode = mode;
 
     if (!game_init_vita(&game, mode, seed)) {
         plat_log("game_init failed");
@@ -247,8 +255,11 @@ static int run_windowed(int mode_override, uint32_t seed, int theme)
     }
 
     game_set_highscore(&game, saved_highscore);
-    plat_log("mode=%s (%s) seed=%u highscore=%d", mode_get(mode)->name,
-             mode_override >= 0 ? "command line" : "saved", (unsigned)seed,
+    plat_log("mode=%s (%s) theme=%s (%s) seed=%u highscore=%d",
+             mode_get(mode)->name,
+             mode_override >= 0 ? "command line" : "saved",
+             theme_get(theme)->name,
+             theme_override >= 0 ? "command line" : "saved", (unsigned)seed,
              saved_highscore);
 
     input_init(&in);
@@ -289,7 +300,8 @@ static int run_windowed(int mode_override, uint32_t seed, int theme)
          * that can raise them, including the immediate first step that
          * game_queue_input takes out of READY, and Square landing on a new
          * difficulty. Both live in one record, so one write covers both. */
-        if (game.highscore > saved_highscore || game.mode != cur_mode) {
+        if (game.highscore > saved_highscore || game.mode != cur_mode ||
+            rc.theme != cur_theme) {
             if (game.highscore > saved_highscore) {
                 saved_highscore = game.highscore;
             }
@@ -298,7 +310,11 @@ static int run_windowed(int mode_override, uint32_t seed, int theme)
                 saved_mode = game.mode;
                 plat_log("difficulty: %s", mode_get(saved_mode)->name);
             }
-            (void)score_save(saved_highscore, saved_mode);
+            if (rc.theme != cur_theme) {
+                cur_theme   = rc.theme;
+                saved_theme = rc.theme;
+            }
+            (void)score_save(saved_highscore, saved_mode, saved_theme);
         }
 
         render_frame(ren, &rc, &game);
@@ -377,7 +393,7 @@ int shell_main(int argc, char **argv)
     uint32_t    diag_mask   = 0;
     int         headless    = 0;
     int         mode        = -1; /* -1: play the difficulty last chosen */
-    int         theme       = THEME_MAIN;
+    int         theme       = -1; /* -1: use the theme last chosen */
     uint32_t    seed        = 0;
     int         have_seed   = 0;
     int         status;
@@ -436,7 +452,10 @@ int shell_main(int argc, char **argv)
     plat_init();
 
     if (headless) {
-        status = run_headless(script_path, outdir, theme, shots,
+        /* Screenshots must not depend on whatever is in the player's save
+         * file, so headless defaults to Main rather than to the saved theme. */
+        status = run_headless(script_path, outdir,
+                              theme >= 0 ? theme : THEME_MAIN, shots,
                               shot_count, diag_mask);
     } else {
         if (!have_seed) {

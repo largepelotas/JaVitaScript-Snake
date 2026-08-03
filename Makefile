@@ -100,7 +100,8 @@ $(BUILD)/test_input: $(BUILD)/test_input.o $(BUILD)/shell_input.o $(PLAT_OBJ) \
 # The save record is the only state that outlives the process, so it is tested
 # through the real platform layer against a redirected XDG_DATA_HOME rather than
 # against a stub (tests/test_score.c).
-$(BUILD)/test_score: $(BUILD)/test_score.o $(BUILD)/shell_score.o $(PLAT_OBJ) \
+$(BUILD)/test_score: $(BUILD)/test_score.o $(BUILD)/shell_score.o \
+                     $(BUILD)/shell_render.o $(BUILD)/shell_text.o $(PLAT_OBJ) \
                      $(CORE_OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(SDL_LIBS)
 

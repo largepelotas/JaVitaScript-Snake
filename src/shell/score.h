@@ -21,16 +21,22 @@
 #define SCORE_RECORD_BYTES 16
 
 /*
- * Reads the record. Either output may be NULL.
+ * Reads the record. Any output may be NULL.
  *
  * A missing, truncated, corrupt or implausible file is not an error: highscore
- * degrades to 0 and mode to MODE_MEDIUM, the original's dropdown default
- * (PLAN.md 6.3, never trust the file). Records written by the pre-difficulty
- * format are still read; they simply carry no mode.
+ * degrades to 0, mode to MODE_MEDIUM, the original's dropdown default, and
+ * theme to Main (PLAN.md 6.3, never trust the file). Records written by the
+ * pre-difficulty format are still read; they simply carry no mode.
+ *
+ * The theme rides in the same record for the same reason the mode does: it is
+ * saved at the same moments, and it needs no format version of its own, because
+ * byte 6 of the meta word was already reserved as zero and already covered by
+ * the checksum (PLAN-THEMES.md 5). Zero is Main, so every record written before
+ * themes existed already says the right thing.
  */
-void score_load(int *highscore, int *mode);
+void score_load(int *highscore, int *mode, int *theme);
 
 /* False if the record could not be written; the caller may keep playing. */
-bool score_save(int highscore, int mode);
+bool score_save(int highscore, int mode, int theme);
 
 #endif /* SCORE_H */
