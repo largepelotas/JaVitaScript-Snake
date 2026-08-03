@@ -74,12 +74,12 @@ static void test_main_is_index_zero(void)
      * assumes it, so this is load-bearing rather than cosmetic
      * (PLAN-THEMES.md 5, 10). */
     CHECK(THEME_MAIN == 0, "THEME_MAIN should be 0, got %d", THEME_MAIN);
-    CHECK(strcmp(theme_get(THEME_MAIN)->name, "main") == 0,
-          "index 0 should be main, got '%s'", theme_get(THEME_MAIN)->name);
-    CHECK(strcmp(theme_get(THEME_MATRIX)->name, "matrix") == 0,
+    CHECK(strcmp(theme_get(THEME_MAIN)->name, "Main") == 0,
+          "index 0 should be Main, got '%s'", theme_get(THEME_MAIN)->name);
+    CHECK(strcmp(theme_get(THEME_MATRIX)->name, "Matrix") == 0,
           "THEME_MATRIX should name matrix, got '%s'",
           theme_get(THEME_MATRIX)->name);
-    CHECK(strcmp(theme_get(THEME_ORIGINAL)->name, "original") == 0,
+    CHECK(strcmp(theme_get(THEME_ORIGINAL)->name, "Original") == 0,
           "THEME_ORIGINAL should name original, got '%s'",
           theme_get(THEME_ORIGINAL)->name);
 }

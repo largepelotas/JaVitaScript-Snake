@@ -350,14 +350,35 @@ static int mode_from_name(const char *s)
     return -1;
 }
 
-/* Looked up in the table rather than hard-coded, so a theme added there is
- * selectable here without touching this function (PLAN-THEMES.md 4). */
+static int ascii_lower(int c)
+{
+    return (c >= 'A' && c <= 'Z') ? c - 'A' + 'a' : c;
+}
+
+/*
+ * Looked up in the table rather than hard-coded, so a theme added there is
+ * selectable here without touching this function (PLAN-THEMES.md 4).
+ *
+ * Matched case-insensitively because the table's names are the labels the
+ * welcome dialog shows ("Main"), while a command line wants to say --theme
+ * main. mode_from_name solves the same problem by keeping a second, lowercase
+ * list; one list that is matched loosely keeps the table the only place a
+ * theme's name is written down.
+ */
 static int theme_from_name(const char *s)
 {
     int i;
 
     for (i = 0; i < theme_count(); i++) {
-        if (strcmp(s, theme_get(i)->name) == 0) {
+        const char *a = s;
+        const char *b = theme_get(i)->name;
+
+        while (*a && *b && ascii_lower((unsigned char)*a) ==
+                           ascii_lower((unsigned char)*b)) {
+            a++;
+            b++;
+        }
+        if (*a == '\0' && *b == '\0') {
             return i;
         }
     }
