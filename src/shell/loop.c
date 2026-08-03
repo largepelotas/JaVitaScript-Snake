@@ -322,15 +322,36 @@ static int mode_from_name(const char *s)
     return -1;
 }
 
+/* Looked up in the table rather than hard-coded, so a theme added there is
+ * selectable here without touching this function (PLAN-THEMES.md 4). */
+static int theme_from_name(const char *s)
+{
+    int i;
+
+    for (i = 0; i < theme_count(); i++) {
+        if (strcmp(s, theme_get(i)->name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 static void usage(const char *argv0)
 {
+    int i;
+
     fprintf(stderr,
-            "usage: %s [--mode easy|medium|hard] [--seed N]\n"
+            "usage: %s [--mode easy|medium|hard] [--seed N] [--theme NAME]\n"
             "       (without --mode, the saved difficulty is used;"
             " press M or Square on the welcome screen to change it)\n"
             "       %s --headless --script FILE [--outdir DIR]"
-            " [--shot name@tick ...] [--diag MASK]\n",
+            " [--shot name@tick ...] [--diag MASK] [--theme NAME]\n"
+            "themes:",
             argv0, argv0);
+    for (i = 0; i < theme_count(); i++) {
+        fprintf(stderr, " %s", theme_get(i)->name);
+    }
+    fprintf(stderr, "\n");
 }
 
 #define MAX_CLI_SHOTS SCRIPT_MAX_SHOTS
@@ -344,6 +365,7 @@ int shell_main(int argc, char **argv)
     uint32_t    diag_mask   = 0;
     int         headless    = 0;
     int         mode        = -1; /* -1: play the difficulty last chosen */
+    int         theme       = THEME_MAIN;
     uint32_t    seed        = 0;
     int         have_seed   = 0;
     int         status;
@@ -368,6 +390,12 @@ int shell_main(int argc, char **argv)
         } else if (strcmp(argv[i], "--mode") == 0 && i + 1 < argc) {
             mode = mode_from_name(argv[++i]);
             if (mode < 0) {
+                usage(argv[0]);
+                return 2;
+            }
+        } else if (strcmp(argv[i], "--theme") == 0 && i + 1 < argc) {
+            theme = theme_from_name(argv[++i]);
+            if (theme < 0) {
                 usage(argv[0]);
                 return 2;
             }
@@ -396,13 +424,13 @@ int shell_main(int argc, char **argv)
     plat_init();
 
     if (headless) {
-        status = run_headless(script_path, outdir, THEME_MAIN, shots,
+        status = run_headless(script_path, outdir, theme, shots,
                               shot_count, diag_mask);
     } else {
         if (!have_seed) {
             seed = plat_seed();
         }
-        status = run_windowed(mode, seed, THEME_MAIN);
+        status = run_windowed(mode, seed, theme);
     }
 
     plat_shutdown();

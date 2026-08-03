@@ -12,6 +12,10 @@ CFLAGS  ?= -std=c99 -Wall -Wextra -Wpedantic -Wshadow -Wconversion \
 BUILD   := build-host
 SHOTS   := artifacts
 
+# Theme names in table order (src/shell/render.c). Only the per-theme
+# screenshots use these; the geometry probes stay on Main (PLAN-THEMES.md 8).
+THEME_NAMES := main matrix original
+
 # Header dependencies. Without these, changing a struct in a header rebuilds
 # only some of its users and links objects that disagree about a layout - which
 # is not a build annoyance but a memory-corruption bug that looks like a game
@@ -146,6 +150,22 @@ shots: $(BUILD)/snake $(BUILD)/bmp2png $(BUILD)/pixel_probe
 	$(BUILD)/snake --headless --outdir $(SHOTS) \
 	    --script tests/replays/01_straight_run.txt \
 	    --shot diagnostic@0 --diag 0x34
+	@# One welcome, playing, paused and dead per theme (PLAN-THEMES.md 8),
+	@# from the same blessed scripts as the Main shots above. paused and dead
+	@# are here because pause_bg, pause_text and overlay_text_end appear in no
+	@# other frame - a welcome-and-playing pair would not show them at all.
+	@for t in $(THEME_NAMES); do \
+	    $(BUILD)/snake --headless --outdir $(SHOTS) --theme $$t \
+	        --script tests/replays/01_straight_run.txt \
+	        --shot theme_$${t}_welcome@0 --shot theme_$${t}_dead@999999 \
+	        || exit 1; \
+	    $(BUILD)/snake --headless --outdir $(SHOTS) --theme $$t \
+	        --script tests/replays/03_pause_resume.txt \
+	        --shot theme_$${t}_paused@21 || exit 1; \
+	    $(BUILD)/snake --headless --outdir $(SHOTS) --theme $$t \
+	        --script tests/shots/long_snake.txt \
+	        --shot theme_$${t}_playing@1035 || exit 1; \
+	done
 	@for b in $(SHOTS)/*.bmp; do \
 	    $(BUILD)/bmp2png $$b $${b%.bmp}.png || exit 1; \
 	done
