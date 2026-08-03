@@ -101,7 +101,7 @@ copy. See §9 for the Vita grid.
 | Starting direction | none; `lastMove` = 1 (RIGHT) | `snake.js:164-167` |
 | Moves immediately? | **No** — waits for first direction input | `snake.js:1266-1339` |
 | Growth per food | **5** | `snake.js:159`, `snake.js:426-447` |
-| Head vs body rendering | **no difference in the main theme** | see §7.3 |
+| Head vs body rendering | **no difference in any theme this port carries** | see §7.3, §8.3, §8.6 |
 
 `SNAKE.Snake` defaults `startRow`/`startCol` to 1 (`snake.js:197-198`), but
 `SNAKE.Board` always passes 2 (`snake.js:804-810`, `895-901`). **The effective
@@ -389,7 +389,11 @@ the same highscore. Preserve that.
 
 ---
 
-## 8. Presentation (main theme only)
+## 8. Presentation
+
+§8.1 to §8.5 describe the main theme, which is the original's default and the
+only one v1 shipped. §8.6 adds the other two this port carries; everything
+outside §8.6 — geometry, typography, strings — is identical across all three.
 
 ### 8.1 Colors
 
@@ -443,7 +447,15 @@ but **`main-snake.css` never styles it** — only `head-snake.css`,
 do. In the main theme the head and body are visually identical while alive.
 
 This answers PLAN.md 3.3's "there is a head color feature in the repo history":
-the feature exists, but not in the theme v1 ships.
+the feature exists, but not in the main theme.
+
+`blue-snake.css` is one of the stylesheets that does distinguish them, and it is
+carried here as Original (§8.6), so this port could have modelled a head colour.
+It deliberately does not: the field would have existed for exactly one theme,
+and Original's body tile is the shared `snakeblock.png`, so a uniformly yellow
+snake is what that tile actually is. Its head block
+(`green-head-snakeblock.png`, centre `#00620C`) is not drawn. Recorded here
+rather than in §10 because it is a property of one theme, not of the port.
 
 ### 8.4 Typography
 
@@ -483,6 +495,69 @@ Vita rewrites per PLAN.md 6.5/6.6 — wording only, typography and color unchang
 
 `Play Again?` is retained on the death and win overlays, with `Press X` as the
 prompt.
+
+### 8.6 Themes
+
+The reference builds a dropdown from a fourteen-entry `THEMES` array
+(`index.html:90-104`), each entry a label naming its contributor and a
+stylesheet. This port carries three of them, cycled with Triangle on any screen.
+The labels and authors below are the reference's own.
+
+| Index | Name | Author | Stylesheet |
+|---|---|---|---|
+| 0 | Main | patorjk | `css/main-snake.css` (the original's default) |
+| 1 | Matrix | Geahad Haymor | `css/matrix-snake.css` |
+| 2 | Original | DylanLCrocker | `css/blue-snake.css` |
+
+"Original Theme by DylanLCrocker" maps to `blue-snake.css`, which is worth
+recording because the filename does not say so.
+
+Values that live in a stylesheet are cited to a line. Values that live in a
+block image are the **centre pixel** of that image, which is the convention §8.1
+already uses: `snakeblock.png` is a 20x20 tile whose outer ring is the playfield
+colour showing through, so its centre is the body colour and its mean is not.
+
+| Field | Main | Matrix | Original |
+|---|---|---|---|
+| Background (letterbox) | `#FC5454` | `#00FF11` | `#004620` |
+| Playfield | `#0000A8` | `#000000` | `#149C36` |
+| Snake | `#FCFC54` | `#00C848` | `#FCFC54` |
+| Dead head | `#C0C0C0` | `#C0C0C0` | `#C0C0C0` |
+| Food | `#FF0000` | `#E80015` | `#CF2121` |
+| HUD text | `#FFFFFF` | `#000000` | `#FFFFFF` |
+| Dialog background | `#000000` | `#000000` | `#000000` |
+| Welcome text | `#FFFFFF` | `#00FF11` | `#FFFFFF` |
+| Death / win text | `#FFFFFF` | `#FF0000` | `#FFFFFF` |
+| Pause background | `#000000` | `#000000` | `#004620` |
+| Pause text | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` |
+| Button border | `#FFFFFF` | `#00FF11` | `#FFFFFF` |
+
+- **Matrix** — `matrix-snake.css:1` body, `:54` playing field, `:29` panel,
+  `:63` welcome, `:69` death and win, `:25-26` pause screen. Snake is the centre
+  of `matrix-snake-block.png`, food the centre of `matrix-food-block.png`. Dead
+  blocks fall back to the shared `deadblock.png`.
+- **Original** — `blue-snake.css:1` body, `:58` playing field, `:52` food,
+  `:23` panel, `:63` welcome, `:69` death and win, `:19-20` pause screen. The
+  body tile is the shared `snakeblock.png`, so the snake is the same yellow as
+  Main.
+
+Three colours here have no counterpart in §8.1 because the main theme cannot
+show them. The reference styles `.snake-pause-screen` separately from the
+welcome and death dialogs, and all three disagree in the themes this port adds:
+Matrix's pause text is white rather than its dialog green, its death and win
+dialogs are red rather than its welcome green, and Original's pause background
+is its dark green rather than black. Main is identical in all three places,
+which is why v1 could use one value for all of them.
+
+**Dark, listed at `index.html:92`, is deliberately not carried.** Its snake
+(`#15241F`, the centre of `dark-snakeblock.png` — a JPEG despite its `.png`
+name) against its playfield (`#312E44`) is a WCAG contrast ratio of 1.23:1,
+against 12.26:1 for Main and 9.36:1 for Matrix. In the browser the tile's
+texture separates snake from board, and §10 row 13 flattens exactly that away.
+Its own stylesheet offers no remedy: `dark-snake.css:46` sets the body block's
+border to `0px`, and the 3px and 2px borders in that file are on the playing
+field and the food. Carrying it would have meant either a theme that is hard to
+play or an invented outline that is not the theme its author wrote.
 
 ---
 
@@ -558,6 +633,9 @@ match the original exactly.
 | 10 | Dialog buttons are outlined labels, not widgets | The original's `Play Game` / `Play Again?` are real `<button>` elements styled by the browser. There is no widget toolkit here, so §8.5's prompt text is drawn inside a 1px outline in the same position. Color and typography are unchanged. |
 | 11 | Bundled DejaVu Sans instead of Verdana | Verdana cannot be redistributed. DejaVu Sans descends from Bitstream Vera, whose proportions were drawn close to Verdana's, and it is freely licensed (`assets/font-LICENSE.txt`). |
 | 12 | Difficulty is cycled with Square on the welcome screen, and persists | The original's `<select>` (`index.html:155-161`) has no Vita equivalent. §8.5 has the welcome-screen wording. Square cycles Easy → Medium → Hard → Easy, and the choice is saved, and the cycle is refused outside `WELCOME`. Note: an earlier version of this row claimed the original disables its dropdown during play. It does not — `snake.js:172-192` applies a mode change to `snakeSpeed` immediately, so the original *can* change speed underneath a running snake, and `handleDeath` (`snake.js:473-475`) re-reads the dropdown afterwards. Refusing it mid-game is therefore a deliberate departure, not a port: a step interval that changes while the snake is moving is a fairness problem on a handheld with one save slot for the highscore. The original also does not persist the choice across a reload; saving it is a handheld affordance. |
+| 13 | Block artwork is flattened to one colour per theme | Every theme draws its snake and food as tiled PNGs with an inner gradient or texture. v1 already flattened `snakeblock.png` to its centre pixel; §8.6 extends the same rule to Matrix and Original, whose tiles are textured rather than flat. This is also what makes Dark unplayable here and therefore uncarried — see §8.6. |
+| 14 | Original's rounded food corners are not modelled | `blue-snake.css:55` gives food `border-radius: 6px`. At a 20px block that is visible but purely decorative, and modelling it would mean a non-rectangular blit for one theme. Every other border in the three carried stylesheets is `0px`, so no other border is skipped. |
+| 15 | Theme is cycled with Triangle, on any screen, and persists | The reference's theme `<select>` (`index.html:90-104`) has no Vita equivalent. Unlike the difficulty (row 12) this is *not* refused during play, which matches the original: its `<select>` swaps the stylesheet the moment it changes (`index.html:183-190`), at any point in a game. A theme has no effect on gameplay, so there is no fairness objection to changing it mid-run. The choice is saved, which the original does not do across a reload; that is the same handheld affordance as row 12. |
 
 ---
 

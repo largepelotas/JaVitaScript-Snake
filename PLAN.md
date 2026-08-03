@@ -46,6 +46,23 @@ Live original: https://patorjk.com/games/snake/
      be written as data tables so adding them later is a data change, not a
      code change.
 
+     AMENDED 2026-08-03, post-v1. Alternate themes are now IN, and the bet
+     above paid: the theme table was the right shape and adding two rows to it
+     was most of the work. Matrix and Original ship alongside Main, cycled with
+     Triangle, planned in docs/PLAN-THEMES.md and specified in MECHANICS.md
+     8.6. This amendment exists so 0.6 is not quietly contradicted by the code.
+
+     What the data-table bet did not cover, recorded because it is the honest
+     accounting: three colour fields had to be ADDED to the struct, not just
+     filled in, because the reference styles the pause screen separately from
+     the welcome and death dialogs and Main is the same colour in all three -
+     so v1 could not have discovered the difference. Adding a theme is a data
+     change only when the new theme uses no colour the table has no column for.
+
+     Still out of scope, unchanged: the other eleven themes in the reference's
+     dropdown, Impossible and Rush, fullscreen, and the AI hooks. Dark was
+     planned and then cut on measurement (PLAN-THEMES.md 10).
+
 
 ==============================================================================
 1. DECISIONS ALREADY MADE (do not relitigate)

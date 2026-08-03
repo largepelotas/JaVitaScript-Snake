@@ -309,6 +309,57 @@ The log is flushed after every line, so even a lock-up leaves one worth reading.
 
 ---
 
+## 18. Triangle cycles the theme, on any screen (MECHANICS.md §10 row 15)
+
+New in the themes build. Press **Triangle** on the welcome screen: the line
+`Theme: Main - TRIANGLE to change` should advance Main → Matrix → Original →
+Main, the whole screen should recolour with it, and the credit line under the
+MIT one should change to name that theme's author.
+
+Then start a game and press Triangle **while the snake is moving**. Unlike
+Square, this is meant to work mid-game — the original swaps its stylesheet live
+— and the snake must not stutter, change speed or die when it happens.
+
+Check each theme at least once in all four places, because three colours appear
+in only one of them each:
+
+| Where | What to look at |
+|---|---|
+| Welcome | Theme name and author line |
+| Playing | Snake against the playfield, and the food |
+| **Paused** | Matrix's pause text is white, not green. Original's pause box is dark green, not black. |
+| **Death or win** | Matrix's dialog text is **red**, where its welcome text is green. |
+
+The two bold rows are the ones worth being fussy about: those fields exist
+because Main could not show them, so a screenshot of Main proves nothing about
+either.
+
+Legibility is the real question here, and the device screen is the only place it
+can be answered. Matrix measures 9.36:1 for snake against playfield and Main
+12.26:1, but **Original is 3.29:1, and its food is 1.50:1 against its
+playfield** — the lowest contrast anything in this build has. If the red food on
+green is hard to spot in normal play, say so; that is a judgement the numbers
+cannot make.
+
+**Result:**
+
+## 19. The theme persists across launches
+
+Cycle to **Matrix**, exit to the LiveArea, close the game and relaunch.
+
+Expect: the welcome screen comes up in Matrix. `log.txt` shows
+`theme: Matrix` when you cycled to it, and `theme=Matrix (saved)` on the next
+launch.
+
+Then check it survives alongside everything else: set Hard **and** Original,
+beat the highscore, relaunch, and confirm all three came back. They share one
+16-byte record, so a bug in one loses the others.
+
+`log.txt` must not contain `score: theme ... is not in this build` — that would
+mean the record holds an index this build does not have.
+
+**Result:**
+
 ## What to send back
 
 1. This file with the results filled in.
