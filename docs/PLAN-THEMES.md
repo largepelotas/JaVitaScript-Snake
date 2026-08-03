@@ -1,32 +1,35 @@
-# Plan: four themes, cycled with Triangle
+# Plan: three themes, cycled with Triangle
 
 Post-v1 work. v1 shipped one theme because PLAN.md 0.6 fixed the scope, and the
 theme table was written as data specifically so this stays a data change
 (`src/shell/render.h`, "themes must be data"). This plan is what that change
-actually costs, which is slightly more than a table row: three of the four
-themes use a colour the current `Theme` struct has no field for.
+actually costs, which is slightly more than a table row: one of the three themes
+uses a colour the current `Theme` struct has no field for.
 
 Nothing here is invented. Every value below was read out of `reference/`, and
 the ones that live in images were sampled from the images rather than guessed.
 
+**Revised 2026-08-03**, after the §10 questions were answered. The plan
+originally proposed four themes and two new struct fields; Dark and `snake_head`
+were both cut. §10 records what was decided and the measurements behind it.
+
 ## 1. Scope
 
-Four themes, in this order, cycled with Triangle on any screen:
+Three themes, in this order, cycled with Triangle on any screen:
 
 | Index | Name | Author | Reference stylesheet |
 |---|---|---|---|
 | 0 | Main | patorjk | `css/main-snake.css` (default, already shipped) |
-| 1 | Dark | KenyStev | `css/dark-snake.css` |
-| 2 | Matrix | Geahad Haymor | `css/matrix-snake.css` |
-| 3 | Original | DylanLCrocker | `css/blue-snake.css` |
+| 1 | Matrix | Geahad Haymor | `css/matrix-snake.css` |
+| 2 | Original | DylanLCrocker | `css/blue-snake.css` |
 
 The labels and authors are the reference's own, from the `THEMES` array at
 `reference/src/index.html:90-104`. "Original Theme by DylanLCrocker" maps to
 `blue-snake.css`, which is worth writing down because the filename does not say
 so.
 
-Out of scope: the other ten themes in that array, and the per-theme block
-artwork as artwork — see §3.
+Out of scope: the other eleven themes in that fourteen-entry array — including
+Dark, cut in §10 — and the per-theme block artwork as artwork, see §3.
 
 ## 2. Extracted colours
 
@@ -35,28 +38,22 @@ which is the convention the shipped Main theme already follows: `snakeblock.png`
 is a 20x20 tile whose outer ring is the playfield colour showing through, so the
 centre is the body colour and the mean is not.
 
-| Field | Main | Dark | Matrix | Original |
-|---|---|---|---|---|
-| `background` | `#FC5454` | `#3E2E44` | `#00FF11` | `#004620` |
-| `playfield` | `#0000A8` | `#312E44` | `#000000` | `#149C36` |
-| `snake` | `#FCFC54` | `#15241F` | `#00C848` | `#FCFC54` |
-| `snake_head` (new) | `#FCFC54` | `#15241F` | `#00C848` | `#00620C` |
-| `snake_dead` | `#C0C0C0` | `#020202` | `#C0C0C0` | `#C0C0C0` |
-| `food` | `#FF0000` | `#000000` | `#E80015` | `#CF2121` |
-| `hud_text` | `#FFFFFF` | `#938996` | `#000000` | `#FFFFFF` |
-| `overlay_bg` | `#000000` | `#000000` | `#000000` | `#000000` |
-| `overlay_text` | `#FFFFFF` | `#938996` | `#00FF11` | `#FFFFFF` |
-| `overlay_text_end` (new) | `#FFFFFF` | `#938996` | `#FF0000` | `#FFFFFF` |
-| `button_border` | `#FFFFFF` | `#938996` | `#00FF11` | `#FFFFFF` |
+| Field | Main | Matrix | Original |
+|---|---|---|---|
+| `background` | `#FC5454` | `#00FF11` | `#004620` |
+| `playfield` | `#0000A8` | `#000000` | `#149C36` |
+| `snake` | `#FCFC54` | `#00C848` | `#FCFC54` |
+| `snake_dead` | `#C0C0C0` | `#C0C0C0` | `#C0C0C0` |
+| `food` | `#FF0000` | `#E80015` | `#CF2121` |
+| `hud_text` | `#FFFFFF` | `#000000` | `#FFFFFF` |
+| `overlay_bg` | `#000000` | `#000000` | `#000000` |
+| `overlay_text` | `#FFFFFF` | `#00FF11` | `#FFFFFF` |
+| `overlay_text_end` (new) | `#FFFFFF` | `#FF0000` | `#FFFFFF` |
+| `button_border` | `#FFFFFF` | `#00FF11` | `#FFFFFF` |
 
 Provenance, per column:
 
 - **Main** — unchanged, already cited in `src/shell/render.c`.
-- **Dark** — `dark-snake.css:7` body, `:61` playing field, `:56` food (black),
-  `:37` panel, `:70` and `:76` dialogs. `snake` is the centre of
-  `images/dark-snakeblock.png`, which is a JPEG despite the extension (50x50,
-  mean `#283532`). `snake_dead` is the centre of `dead-dark-snakeblock.png`
-  (mean `#0D0D0D`).
 - **Matrix** — `matrix-snake.css:1` body, `:54` playing field, `:29` panel,
   `:63` welcome, `:69` end-game. `snake` is the centre of
   `matrix-snake-block.png` (mean `#00C349`), `food` the centre of
@@ -65,36 +62,48 @@ Provenance, per column:
 - **Original** — `blue-snake.css:1` body (`rgb(0,70,32)`), `:58` playing field
   (`rgb(20,156,54)`), `:52` food (`rgb(207,33,33)`), `:23` panel, `:63` and
   `:69` dialogs. The body tile is the shared `snakeblock.png`, so the body is
-  the same yellow as Main; the head is `green-head-snakeblock.png`, centre
-  `#00620C`, which is what motivates `snake_head`.
+  the same yellow as Main.
+
+One provenance note that does not change any value: Original sets
+`.snake-snakebody-block { background-color: #247FB4 }` (`blue-snake.css:41`),
+a blue that shows through `snakeblock.png`'s transparent outer ring where Main
+shows its playfield. Since this port flattens each tile to its centre pixel, the
+ring is not modelled in either theme — it falls under the block-artwork
+deviation in §3.
 
 ## 3. Struct changes
 
-Two new fields, both required by themes above rather than speculative:
+One new colour field, required by Matrix rather than speculative, plus the
+attribution string from §6:
 
 ```c
-SDL_Color snake_head;       /* Original draws a different head block  */
-SDL_Color overlay_text_end; /* Matrix's death/win dialogs are red     */
+SDL_Color   overlay_text_end; /* Matrix's death/win dialogs are red */
+const char *author;           /* credited in the welcome dialog     */
 ```
 
-For the three themes that do not distinguish them, the new field simply repeats
-the old one — that is the point of a table.
+For the two themes that do not distinguish `overlay_text_end` from
+`overlay_text`, the new field simply repeats the old one — that is the point of
+a table.
 
-`snake_head` needs `render_frame` to colour the head cell separately. The board
-is drawn from cell occupancy, so the head has to come from `snake_head(&g->snake)`
-and be painted after the body. One extra rect per frame; no geometry change.
+Note what this does **not** need: no change to `render_frame`'s drawing of the
+snake. With `snake_head` cut (§10), the board is still drawn purely from cell
+occupancy, exactly as today. Step 1 of §11 is therefore a pure data change.
 
 **Deliberately not modelled**, and each becomes a row in MECHANICS §10:
 
 - **Block artwork.** Every theme draws its snake as a tiled PNG with an inner
   gradient or texture. v1 already flattens `snakeblock.png` to one colour;
-  extending that to three more themes is consistent, not a new deviation, but
-  Dark and Matrix lose the most (their tiles are textured, not flat).
-- **Borders.** Dark puts a 3px black border on the playing field
-  (`dark-snake.css:61`) and a 2px `#3E2E44` border on food (`:56`). Both are
-  purely decorative at this block size. Skipping them keeps MECHANICS §9's
-  geometry untouched; a `playfield_border` field can be added later if the
-  screenshots look wrong without it.
+  extending that to two more themes is consistent, not a new deviation, though
+  Matrix loses the most (its tiles are textured, not flat).
+- **Rounded food corners.** Original gives food `border-radius: 6px`
+  (`blue-snake.css:55`). At a 20px block that is a visible but purely decorative
+  rounding, and modelling it would mean a non-rectangular blit for one theme.
+
+Borders are no longer a deviation at all: with Dark cut, every remaining
+stylesheet sets `border: 0px` on the body block, food block and playing field
+(`main-snake.css:40,53,58`, `matrix-snake.css:38,50,56`,
+`blue-snake.css:35,54,60`). The original draws no borders here, and neither do
+we.
 
 ## 4. Selection and where the state lives
 
@@ -131,7 +140,10 @@ covers the whole word. Byte 6 becomes the theme index:
 
 So the format is compatible in both directions with no version change. An
 unknown theme index falls back to Main while keeping the highscore, mirroring
-what `score_load` already does for an unknown mode.
+what `score_load` already does for an unknown mode. This now matters slightly
+more than when the plan was written: a record saved by a hypothetical build that
+kept Dark at index 1 would land on Matrix here, so the clamp is what keeps an
+out-of-range or stale index harmless.
 
 `score_load`/`score_save` grow a third parameter. Both already accept `NULL`
 outputs, so the callers that do not care stay honest.
@@ -143,8 +155,8 @@ credits each one by name in its dropdown. So should we:
 
 - `Theme` gains `const char *author`.
 - The welcome dialog's small credit block gains a second line:
-  `Main theme by patorjk` / `Dark theme by KenyStev` / etc.
-- The welcome line itself stays short — `Theme: Dark - TRIANGLE to change` —
+  `Main theme by patorjk` / `Matrix theme by Geahad Haymor` / etc.
+- The welcome line itself stays short — `Theme: Matrix - TRIANGLE to change` —
   because the dialog content column is 300px (`DIALOG_CONTENT_W`) and
   `Theme: Original by DylanLCrocker - TRIANGLE to change` does not fit at 14px.
 
@@ -173,9 +185,9 @@ Host-side, in the existing binaries:
 
 ## 8. Screenshots
 
-`make shots` gains a welcome and a playing shot per theme, driven by the
-existing blessed replays with `--theme` added, so the pictures stay tied to
-runs the tests already verify.
+`make shots` gains a welcome and a playing shot per theme — six pictures for
+three themes — driven by the existing blessed replays with `--theme` added, so
+the pictures stay tied to runs the tests already verify.
 
 `tests/check_layout.sh` asserts geometry by probing pixels for specific colours
 (`0000A8` for the playfield, and so on). Those probes must keep running against
@@ -188,44 +200,71 @@ risk here.
 ## 9. Documentation
 
 - MECHANICS.md — a new §8.6 with the table from §2 and its citations; §10 rows
-  for flattened block art and skipped borders.
+  for flattened block art and Original's rounded food corners.
 - README.md — Controls (Triangle / `T`), the theme list with authors, and the
   save-data row.
-- TESTPLAN.md — one new item: cycle through all four themes on hardware, check
+- TESTPLAN.md — one new item: cycle through all three themes on hardware, check
   each is legible on the device screen, and confirm the choice survives a
-  relaunch. Dark is the one to look at hardest (§10).
+  relaunch.
 - PLAN.md 0.6 says v1 is fixed at one theme. This is post-v1, so 0.6 needs a
   line saying so rather than being quietly contradicted.
 
-## 10. Open questions for you
+## 10. Decisions
 
-1. **Dark's contrast.** Its snake (`#15241F`) against its playfield (`#312E44`)
-   is very low contrast — in the browser the tile has texture and a border to
-   separate it, and we have neither. It may be genuinely hard to play on the
-   Vita's screen. Options: ship it faithfully and let the TESTPLAN item decide;
-   use the tile's mean `#283532` instead of its centre, which lifts it slightly;
-   or add the border the CSS asks for. Faithful-first is my recommendation —
-   we will have a screenshot before it ever reaches hardware.
-2. **Is `snake_head` worth it?** It exists for exactly one theme. Dropping it
-   makes Original's snake uniformly yellow — which is what its body tile is —
-   and saves a field plus a per-frame rect. I lean toward keeping it: a green
-   head on a yellow body is the visible identity of that theme.
-3. **Cycle order.** Main, Dark, Matrix, Original as listed, or the reference's
-   own dropdown order (Light, Main, Dark, Green, Matrix, ..., Original)? The
-   latter is only meaningful if the missing themes are eventually added.
+Settled 2026-08-03. The three questions this section used to ask, and what was
+decided:
+
+1. **Dark's contrast — Dark is cut.** Measured WCAG contrast of snake against
+   playfield, which is what decides whether the snake is findable on the board:
+
+   | Theme | Snake on playfield | Contrast |
+   |---|---|---|
+   | Main | `#FCFC54` on `#0000A8` | 12.26:1 |
+   | Matrix | `#00C848` on `#000000` | 9.36:1 |
+   | Original | `#FCFC54` on `#149C36` | 3.29:1 |
+   | Dark | `#15241F` on `#312E44` | **1.23:1** |
+
+   Two mitigations this plan originally offered do not survive measurement.
+   Using the tile's mean `#283532` instead of its centre was described as
+   lifting the contrast slightly; it does the opposite, dropping it to
+   **1.03:1**, because the mean sits closer to the playfield colour. And
+   "add the border the CSS asks for" does not apply to the snake:
+   `dark-snake.css:46` sets `.snake-snakebody-block { border: 0px solid black }`.
+   The 3px and 2px borders in that file are on the playing field and the food.
+
+   So Dark is dark-on-dark in the browser too, and only the JPEG tile's texture
+   separates it from the board — precisely what this port flattens away. Making
+   it playable would mean inventing an outline the original does not have.
+   Rather than ship a theme that is hard to play or a theme that is not the one
+   its author wrote, it is cut. Its colours stay recorded in this file's history
+   if it is ever revisited.
+
+2. **`snake_head` is cut.** It existed for exactly one theme. Original's snake
+   is now uniformly yellow, which is what its shared body tile actually is. This
+   removes a struct field, a per-frame rect, and the separate head pass in
+   `render_frame` — see §3 and the revised §11 step 2.
+
+3. **Cycle order: as listed in §1.** Main stays at index 0, which the save
+   record's default byte and every existing screenshot already assume. With
+   Dark cut, the order is Main, Matrix, Original. The reference's own dropdown
+   order was rejected: with eleven of fourteen themes missing it has gaps, and
+   it would move Main off index 0 for no benefit.
 
 ## 11. Work order
 
-1. Struct fields, table, and `theme_get` clamp — no behaviour change yet.
-2. `snake_head` in `render_frame`; regenerate Main's shots and confirm they are
-   byte-identical, proving the refactor is inert.
-3. `--theme`, then per-theme shots. **Look at all eight pictures before wiring
-   any input**, which is the same order Phase 3 used and the reason it worked.
+1. Struct fields (`overlay_text_end`, `author`), the three-row table, and the
+   `theme_get` clamp. With `snake_head` cut this is a pure data change — no
+   drawing code moves.
+2. Regenerate Main's shots and confirm they are byte-identical, proving step 1
+   was inert. Cheaper than the original step 2, which had to prove a reworked
+   `render_frame` still drew Main the same way.
+3. `--theme`, then per-theme shots. **Look at all six pictures before wiring any
+   input**, which is the same order Phase 3 used and the reason it worked.
 4. Input: `theme_delta`, Triangle, `T`, diagnostic gate.
 5. Persistence: byte 6, `score_load`/`score_save` signatures, tests.
 6. Welcome-dialog theme line and attribution line.
 7. Docs, then the Vita build, then a TESTPLAN item for the next hardware run.
 
-Exit criteria: all four themes screenshotted and eyeballed, `make test` green
+Exit criteria: all three themes screenshotted and eyeballed, `make test` green
 including the new cases, replay hashes unchanged (proving the core never saw
 this), and the `.vpk` built.
