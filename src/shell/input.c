@@ -36,7 +36,7 @@ static bool button_is(PadButton logical, int index)
     return mapped >= 0 && mapped == index;
 }
 
-static bool handle_key(const SDL_Event *e, GameState *g)
+static bool handle_key(InputState *in, const SDL_Event *e, GameState *g)
 {
     switch (e->key.keysym.sym) {
     case SDLK_UP:
@@ -83,6 +83,14 @@ static bool handle_key(const SDL_Event *e, GameState *g)
     case SDLK_m:
     case SDLK_TAB:
         game_action(g, ACTION_CYCLE_MODE);
+        break;
+
+    /* Triangle on the Vita: next theme. Unlike the difficulty this works on
+     * every screen, matching the reference, whose theme <select> swaps the
+     * stylesheet mid-game (`index.html:183-190`). It is not a game_action
+     * because the core must never learn about themes (PLAN-THEMES.md 4). */
+    case SDLK_t:
+        in->theme_delta++;
         break;
 
     case SDLK_q:
@@ -158,11 +166,12 @@ bool input_diag_active(const InputState *in)
 
 void input_init(InputState *in)
 {
-    in->pad       = NULL;
-    in->stick_dir = DIR_NONE;
-    in->axis_x    = 0;
-    in->axis_y    = 0;
-    in->buttons   = 0;
+    in->pad         = NULL;
+    in->stick_dir   = DIR_NONE;
+    in->axis_x      = 0;
+    in->axis_y      = 0;
+    in->buttons     = 0;
+    in->theme_delta = 0;
 
     if (SDL_NumJoysticks() > 0) {
         in->pad = SDL_JoystickOpen(0);
@@ -194,7 +203,7 @@ bool input_handle(InputState *in, const SDL_Event *e, GameState *g)
         if (e->key.repeat) {
             break; /* held keys must not refill the premove queue */
         }
-        return handle_key(e, g);
+        return handle_key(in, e, g);
 
     case SDL_JOYBUTTONUP:
         if (e->jbutton.button < INPUT_MAX_BUTTONS) {
@@ -242,6 +251,8 @@ bool input_handle(InputState *in, const SDL_Event *e, GameState *g)
             game_action(g, ACTION_BACK);
         } else if (button_is(PAD_CYCLE_MODE, b)) {
             game_action(g, ACTION_CYCLE_MODE);
+        } else if (button_is(PAD_CYCLE_THEME, b)) {
+            in->theme_delta++;
         }
         break;
     }

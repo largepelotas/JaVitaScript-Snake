@@ -43,10 +43,12 @@ SCRIPT_OBJ := $(BUILD)/shell_script.o
 
 all: $(BUILD)/test_core $(BUILD)/replay $(BUILD)/snake
 
-test: $(BUILD)/test_core $(BUILD)/test_input $(BUILD)/test_score $(BUILD)/replay
+test: $(BUILD)/test_core $(BUILD)/test_input $(BUILD)/test_score \
+      $(BUILD)/test_render $(BUILD)/replay
 	@$(BUILD)/test_core
 	@$(BUILD)/test_input
 	@$(BUILD)/test_score
+	@$(BUILD)/test_render
 	@bash tests/run_replays.sh $(BUILD)/replay
 
 $(BUILD):
@@ -76,6 +78,9 @@ $(BUILD)/test_input.o: tests/test_input.c | $(BUILD)
 $(BUILD)/test_score.o: tests/test_score.c | $(BUILD)
 	$(CC) $(CFLAGS) $(DEPFLAGS) $(SDL_CFLAGS) -c $< -o $@
 
+$(BUILD)/test_render.o: tests/test_render.c | $(BUILD)
+	$(CC) $(CFLAGS) $(DEPFLAGS) $(SDL_CFLAGS) -c $< -o $@
+
 $(BUILD)/test_replay.o: tests/replay.c | $(BUILD)
 	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
 
@@ -97,6 +102,13 @@ $(BUILD)/test_input: $(BUILD)/test_input.o $(BUILD)/shell_input.o $(PLAT_OBJ) \
 # against a stub (tests/test_score.c).
 $(BUILD)/test_score: $(BUILD)/test_score.o $(BUILD)/shell_score.o $(PLAT_OBJ) \
                      $(CORE_OBJ)
+	$(CC) $(CFLAGS) $^ -o $@ $(SDL_LIBS)
+
+# The theme table is data, so this only has to prove the data is well-formed and
+# that the two functions over it stay in range (PLAN-THEMES.md 7). It links the
+# real render.c rather than a copy of the table.
+$(BUILD)/test_render: $(BUILD)/test_render.o $(BUILD)/shell_render.o \
+                      $(BUILD)/shell_text.o $(PLAT_OBJ) $(CORE_OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(SDL_LIBS)
 
 $(BUILD)/replay: $(BUILD)/test_replay.o $(SCRIPT_OBJ) $(CORE_OBJ)

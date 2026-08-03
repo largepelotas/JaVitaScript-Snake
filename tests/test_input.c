@@ -245,6 +245,103 @@ static void test_cycle_mode_keys(void)
                                     "screen");
 }
 
+/*
+ * Themes differ from the difficulty in three ways, and each is pinned here:
+ * they are shell state rather than a GameAction, they work on every screen
+ * rather than the welcome screen only, and the core must stay ignorant of them
+ * (PLAN-THEMES.md 4).
+ */
+static void test_cycle_theme(void)
+{
+    GameState  g;
+    InputState in;
+    int        triangle = plat_button_for(PAD_CYCLE_THEME);
+    int        mode_before;
+
+    banner("theme cycling is shell state, on every screen");
+
+    memset(&in, 0, sizeof in);
+    game_init_vita(&g, MODE_EASY, 7u);
+    mode_before = g.mode;
+
+    feed(&in, &g, key_event(SDLK_t, 0));
+    CHECK(in.theme_delta == 1, "t should request one theme advance (got %d)",
+          in.theme_delta);
+
+    /* Nothing about the game may move: not the mode Square owns, not the
+     * screen, not the state hash the replays are pinned to. */
+    CHECK(g.mode == mode_before, "cycling the theme changed the difficulty");
+    CHECK(g.state == STATE_WELCOME, "cycling the theme left the welcome screen");
+
+    /* Held keys must not spin through the table, the same rule as Square. */
+    feed(&in, &g, key_event(SDLK_t, 1));
+    CHECK(in.theme_delta == 1, "a key repeat should not advance the theme "
+                               "(got %d)", in.theme_delta);
+
+    /* Requests accumulate: the loop consumes the total once per frame. */
+    feed(&in, &g, key_event(SDLK_t, 0));
+    CHECK(in.theme_delta == 2, "two presses should queue two advances (got %d)",
+          in.theme_delta);
+
+    /* Triangle does the same through the platform table. */
+    in.theme_delta = 0;
+    feed(&in, &g, button_event((Uint8)triangle));
+    CHECK(in.theme_delta == 1, "Triangle should request a theme advance "
+                               "(got %d)", in.theme_delta);
+    feed(&in, &g, button_up_event((Uint8)triangle));
+
+    /*
+     * The difference from difficulty: this keeps working once the snake is
+     * moving. The reference swaps its stylesheet mid-game, so this does too.
+     */
+    feed(&in, &g, key_event(SDLK_SPACE, 0)); /* welcome -> ready */
+    feed(&in, &g, hat_event(SDL_HAT_UP));    /* ready -> playing  */
+    CHECK(g.state == STATE_PLAYING, "setup: the snake should be moving");
+    in.theme_delta = 0;
+    feed(&in, &g, key_event(SDLK_t, 0));
+    CHECK(in.theme_delta == 1, "t should still cycle while playing (got %d)",
+          in.theme_delta);
+    feed(&in, &g, button_event((Uint8)triangle));
+    CHECK(in.theme_delta == 2, "Triangle should still cycle while playing "
+                               "(got %d)", in.theme_delta);
+    CHECK(g.state == STATE_PLAYING, "cycling the theme disturbed play");
+}
+
+/* Triangle is gated by the diagnostic exactly as Square is: while the panel is
+ * up a press is a probe and nothing else (PLAN-THEMES.md 7). */
+static void test_theme_gated_by_diagnostic(void)
+{
+    GameState  g;
+    InputState in;
+    int        l        = plat_button_for(PAD_L);
+    int        r        = plat_button_for(PAD_R);
+    int        triangle = plat_button_for(PAD_CYCLE_THEME);
+
+    banner("Triangle is inert while the diagnostic is up");
+
+    memset(&in, 0, sizeof in);
+    game_init_vita(&g, MODE_MEDIUM, 9u);
+
+    feed(&in, &g, button_event((Uint8)l));
+    feed(&in, &g, button_event((Uint8)r));
+    CHECK(input_diag_active(&in), "setup: both shoulders should be held");
+
+    feed(&in, &g, button_event((Uint8)triangle));
+    CHECK(in.theme_delta == 0,
+          "Triangle should not cycle the theme while probing (got %d)",
+          in.theme_delta);
+    CHECK((in.buttons & (1u << triangle)) != 0,
+          "Triangle should still report its index to the panel");
+
+    /* And it works again the moment the panel goes away. */
+    feed(&in, &g, button_up_event((Uint8)r));
+    feed(&in, &g, button_up_event((Uint8)triangle));
+    feed(&in, &g, button_event((Uint8)triangle));
+    CHECK(in.theme_delta == 1,
+          "Triangle should cycle once the panel is dismissed (got %d)",
+          in.theme_delta);
+}
+
 static void test_quit(void)
 {
     GameState  g;
@@ -493,6 +590,8 @@ int main(void)
     test_key_repeat_ignored();
     test_actions();
     test_cycle_mode_keys();
+    test_cycle_theme();
+    test_theme_gated_by_diagnostic();
     test_quit();
     test_hat();
     test_stick_deadzone_and_edges();

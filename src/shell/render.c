@@ -164,6 +164,20 @@ const Theme *theme_get(int index)
     return &g_themes[index];
 }
 
+int theme_advance(int index, int delta)
+{
+    int n = theme_count();
+    int t;
+
+    /* Reduce first so a large delta cannot overflow the sum, then bias by n
+     * because C's % keeps the sign of its left operand. */
+    t = (index % n + delta % n) % n;
+    if (t < 0) {
+        t += n;
+    }
+    return t;
+}
+
 /* ---- Helpers ------------------------------------------------------------ */
 
 bool render_init(RenderCtx *rc, int theme)
