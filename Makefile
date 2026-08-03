@@ -149,7 +149,7 @@ shots: $(BUILD)/snake $(BUILD)/bmp2png $(BUILD)/pixel_probe
 	@for b in $(SHOTS)/*.bmp; do \
 	    $(BUILD)/bmp2png $$b $${b%.bmp}.png || exit 1; \
 	done
-	@tests/check_layout.sh $(BUILD)/pixel_probe $(SHOTS)
+	@bash tests/check_layout.sh $(BUILD)/pixel_probe $(SHOTS)
 	@ls -1 $(SHOTS)/*.png
 
 # Proves the SDL shell drives the core to the same state the core-only harness
