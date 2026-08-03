@@ -26,6 +26,14 @@ typedef struct {
     int           axis_x;    /* latest raw left-stick deflection */
     int           axis_y;
     uint32_t      buttons;   /* bit per currently-held joystick button index */
+
+    /*
+     * Themes are shell state, not game state: they have no gameplay effect and
+     * must not perturb game_state_hash or any replay, so unlike the difficulty
+     * there is no GameAction for one (PLAN-THEMES.md 4). Requests to advance
+     * the theme accumulate here; the loop consumes and zeroes this each frame.
+     */
+    int theme_delta;
 } InputState;
 
 /* Opens joystick 0 if one is attached. Harmless when none is. */

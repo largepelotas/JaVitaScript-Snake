@@ -53,6 +53,14 @@ typedef struct {
 int          theme_count(void);
 const Theme *theme_get(int index); /* clamped; never returns NULL */
 
+/*
+ * Advances `index` by `delta` and wraps, which is how the loop consumes
+ * InputState.theme_delta. Here rather than in the loop so the wrap is testable
+ * without a window, and so the table stays the only thing that knows how many
+ * themes there are.
+ */
+int theme_advance(int index, int delta);
+
 typedef struct {
     TextFont *font;  /* 14px, the original's body size            */
     TextFont *small; /* 10px, for the derivative-work credit line */

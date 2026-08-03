@@ -264,6 +264,18 @@ static int run_windowed(int mode_override, uint32_t seed, int theme)
             }
         }
 
+        /*
+         * The theme is consumed here rather than through game_action, so the
+         * core never learns it exists and no replay can be perturbed by it
+         * (PLAN-THEMES.md 4). Requests accumulate across the poll above, so
+         * two presses in one frame advance two themes.
+         */
+        if (in.theme_delta != 0) {
+            rc.theme       = theme_advance(rc.theme, in.theme_delta);
+            in.theme_delta = 0;
+            plat_log("theme: %s", theme_get(rc.theme)->name);
+        }
+
         now     = SDL_GetTicks();
         elapsed = now - prev_ms;
         prev_ms = now;
