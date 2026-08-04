@@ -33,7 +33,14 @@ if(VITA)
   # Checked against all 1022 VitaDB homebrew entries and unused.
   # Changing it means touching this line and the ux0:app path in DEPLOY notes.
   set(VITA_TITLEID  "SNEK00001")
-  set(VITA_VERSION  "01.00")
+  # Releases are tagged vMAJOR.MINOR.PATCH; this is v1.1.0. param.sfo holds
+  # XX.YY - major and minor, two zero-padded digits each, which is why v1.0.0
+  # shipped as "01.00" and v1.1.0 is "01.01" and not "01.10". "01.10" is what
+  # a v1.10.0 would read. The patch component has nowhere to go, so the tag
+  # stays authoritative: a later v1.1.1 would read "01.01" here too.
+  #
+  # release-vita.yml checks this against the tag before it builds anything.
+  set(VITA_VERSION  "01.01")
 
   add_executable(snake
     ${COMMON_SOURCES}
