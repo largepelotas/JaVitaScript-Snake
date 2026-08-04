@@ -12,11 +12,11 @@ permissions:
   contents: write
 
 jobs:
-  # The version lives in two places that cannot hold the same string: the tag
-  # is vMAJOR.MINOR.PATCH, and param.sfo takes only XX.YY, so CMakeLists.txt
-  # carries a truncated copy. Nothing keeps them in step, and a .vpk stamped
-  # with the wrong version is not something a player can notice or a release
-  # can be corrected for. So this fails the release before the build runs.
+  # VERSION is what the binary logs at startup and what CMakeLists.txt derives
+  # param.sfo's XX.YY from, but nothing stops a tag being pushed that disagrees
+  # with it - and a .vpk stamped with the wrong version is not something a
+  # player can notice or a release can be corrected for. So this fails the
+  # release before the build runs.
   #
   # Its own job on a plain runner: bash is guaranteed, and a mismatch costs a
   # few seconds instead of a VitaSDK container pull.
@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Tag and VITA_VERSION agree
+      - name: Tag and VERSION agree
         shell: bash
         env:
           # Via env, not ${{ }} inline: a tag name is attacker-chosen text and
@@ -34,37 +34,35 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ ! $TAG =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-            echo "::error::tag '$TAG' is not vMAJOR.MINOR.PATCH (e.g. v1.1.0)"
+          # The grammar CMakeLists.txt applies to VERSION, with a leading v.
+          # Leading zeros are rejected so "v01.2.3" cannot mean two things.
+          num='(0|[1-9][0-9]*)'
+          if [[ ! $TAG =~ ^v$num\.$num\.$num$ ]]; then
+            echo "::error::tag '$TAG' is not vMAJOR.MINOR.PATCH (e.g. v1.1.1)"
             exit 1
           fi
-          # 10# forces base 10: printf %d reads a leading-zero field as octal
-          # and dies on 08 and 09.
-          major=$((10#${BASH_REMATCH[1]}))
-          minor=$((10#${BASH_REMATCH[2]}))
+          major=${BASH_REMATCH[1]}
+          minor=${BASH_REMATCH[2]}
 
+          # Checked here as well as in CMakeLists.txt, so the release fails in
+          # seconds rather than after the container pull.
           if (( major > 99 || minor > 99 )); then
             echo "::error::param.sfo holds two digits per field, so v$major.$minor.x cannot be expressed"
             exit 1
           fi
-          expected=$(printf '%02d.%02d' "$major" "$minor")
 
-          actual=$(sed -n 's/^[[:space:]]*set(VITA_VERSION[[:space:]]*"\([^"]*\)").*/\1/p' CMakeLists.txt)
-          if [[ -z $actual ]]; then
-            echo "::error::no set(VITA_VERSION \"...\") found in CMakeLists.txt"
+          if [[ ! -f VERSION ]]; then
+            echo "::error::no VERSION file at the repository root"
             exit 1
           fi
-          if [[ $(wc -l <<<"$actual") -ne 1 ]]; then
-            echo "::error::CMakeLists.txt sets VITA_VERSION more than once:"
-            echo "$actual"
-            exit 1
-          fi
+          version=$(tr -d '[:space:]' < VERSION)
 
-          if [[ $actual != "$expected" ]]; then
-            echo "::error::tag $TAG wants VITA_VERSION \"$expected\", CMakeLists.txt has \"$actual\""
+          if [[ "v$version" != "$TAG" ]]; then
+            echo "::error::tag $TAG was pushed, but VERSION says $version"
             exit 1
           fi
-          echo "$TAG -> VITA_VERSION \"$actual\", as expected."
+          printf '%s -> VERSION %s, param.sfo APP_VER %02d.%02d\n' \
+                 "$TAG" "$version" "$major" "$minor"
 
   build-vita:
     needs: check-version

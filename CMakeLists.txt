@@ -19,6 +19,44 @@ add_compile_options(
   -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes
 )
 
+# The version, and the only place it is written down. Three consumers want
+# three different shapes of it - the startup log wants all of it, param.sfo
+# takes two fields, release-vita.yml checks it against the tag - so it is
+# derived here rather than transcribed into each of them and left to drift.
+#
+# Leading zeros are rejected so that "01.2.3" cannot mean two things; the CI
+# check applies the same grammar to the tag.
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" SNAKE_VERSION)
+string(STRIP "${SNAKE_VERSION}" SNAKE_VERSION)
+
+if(NOT SNAKE_VERSION MATCHES "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$")
+  message(FATAL_ERROR
+          "VERSION must hold MAJOR.MINOR.PATCH, not '${SNAKE_VERSION}'")
+endif()
+
+set(V_MAJOR ${CMAKE_MATCH_1})
+set(V_MINOR ${CMAKE_MATCH_2})
+
+# param.sfo holds XX.YY: major and minor, two zero-padded digits each. That is
+# why v1.0.0 shipped as "01.00" and v1.1.0 as "01.01" - "01.10" would be a
+# v1.10.0. The patch component has nowhere to go, so a v1.1.1 reads "01.01"
+# too, and the startup log is what tells the two apart on hardware.
+if(V_MAJOR GREATER 99 OR V_MINOR GREATER 99)
+  message(FATAL_ERROR
+          "param.sfo holds two digits per field, so ${SNAKE_VERSION} cannot "
+          "be expressed")
+endif()
+
+if(V_MAJOR LESS 10)
+  set(V_MAJOR "0${V_MAJOR}")
+endif()
+if(V_MINOR LESS 10)
+  set(V_MINOR "0${V_MINOR}")
+endif()
+
+set(VITA_VERSION "${V_MAJOR}.${V_MINOR}")
+message(STATUS "snake ${SNAKE_VERSION} (param.sfo APP_VER ${VITA_VERSION})")
+
 # The core and the shell are byte-identical on both targets; only the platform
 # file differs (PLAN.md 1.2). This list is the whole layering rule, mechanised.
 file(GLOB CORE_SOURCES  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/*.c)
@@ -33,19 +71,13 @@ if(VITA)
   # Checked against all 1022 VitaDB homebrew entries and unused.
   # Changing it means touching this line and the ux0:app path in DEPLOY notes.
   set(VITA_TITLEID  "SNEK00001")
-  # Releases are tagged vMAJOR.MINOR.PATCH; this is v1.1.0. param.sfo holds
-  # XX.YY - major and minor, two zero-padded digits each, which is why v1.0.0
-  # shipped as "01.00" and v1.1.0 is "01.01" and not "01.10". "01.10" is what
-  # a v1.10.0 would read. The patch component has nowhere to go, so the tag
-  # stays authoritative: a later v1.1.1 would read "01.01" here too.
-  #
-  # release-vita.yml checks this against the tag before it builds anything.
-  set(VITA_VERSION  "01.01")
 
   add_executable(snake
     ${COMMON_SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/platform_vita.c
   )
+
+  target_compile_definitions(snake PRIVATE SNAKE_VERSION="${SNAKE_VERSION}")
 
   # Debug info in the unstripped ELF, which is what vita-parse-core reads a
   # crash dump against (PLAN.md 7.5). Without it a dump symbolises to function
@@ -100,6 +132,7 @@ else()
     ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/platform_desktop.c
   )
   target_link_libraries(snake PkgConfig::SDL2TTF PkgConfig::SDL2)
+  target_compile_definitions(snake PRIVATE SNAKE_VERSION="${SNAKE_VERSION}")
 
   # The desktop binary looks for assets/ next to itself as well as in the
   # working directory (see plat_asset_path), so a build-tree run works without

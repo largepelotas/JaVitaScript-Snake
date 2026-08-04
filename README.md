@@ -134,7 +134,30 @@ make livearea
 | Log | `ux0:data/VitaSnake/log.txt` |
 | Bundled font | `app0:assets/font.ttf` |
 
-The log is flushed after every write and survives a lock-up.
+The log is flushed after every write and survives a lock-up. Its first line is
+the build's version:
+
+```
+VitaSnake v1.1.1
+```
+
+That line is the only place on the device where the full version appears.
+`param.sfo` holds `APP_VER` as `XX.YY` — major and minor, two digits each — so
+the LiveArea bubble and Content Manager show `1.01` for every 1.1.x build and
+cannot tell v1.1.0 from v1.1.1. A bug report that quotes this line names its
+build exactly; one that quotes the bubble does not.
+
+## Version
+
+The version is written down once, in [`VERSION`](VERSION), as
+`MAJOR.MINOR.PATCH`. Everything else derives from it: `CMakeLists.txt` computes
+`param.sfo`'s two-field `APP_VER` and defines `SNAKE_VERSION` for the startup
+log, and the Makefile reads the same file for the host build.
+
+Releasing means editing `VERSION`, committing, and pushing a matching `v` tag.
+If the two disagree, `release-vita.yml` fails the release before it builds
+anything — including the case the two-field `APP_VER` cannot catch on its own,
+where a v1.1.0 tag is pushed at a v1.1.1 tree and both would stamp `01.01`.
 
 **Button-index diagnostic.** Hold L + R on the welcome screen to display a
 panel listing every joystick button index currently pressed, alongside what

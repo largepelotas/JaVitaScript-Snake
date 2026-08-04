@@ -31,6 +31,16 @@
 #include <string.h>
 
 /*
+ * Defined by the build from the VERSION file, which is the only place the
+ * version is written down. The fallback is not a default anyone should ship:
+ * it exists so a hand-rolled compile of this file still builds and still logs
+ * something honest, rather than claiming a release it is not.
+ */
+#ifndef SNAKE_VERSION
+#define SNAKE_VERSION "dev"
+#endif
+
+/*
  * A single frame may not advance the snake by more than this, so a stall - a
  * dragged window, a suspend, a slow first frame while the font warms up -
  * cannot fast-forward the snake through a wall (PLAN.md 5.2).
@@ -471,6 +481,15 @@ int shell_main(int argc, char **argv)
     }
 
     plat_init();
+
+    /*
+     * The first line of every log, before anything that can fail. param.sfo
+     * holds only XX.YY, so on the device a v1.1.1 build is indistinguishable
+     * from v1.1.0 everywhere else - LiveArea, Content Manager, the game
+     * itself. This line is the one place the patch component appears on
+     * hardware, which is what makes a bug report name its build.
+     */
+    plat_log("VitaSnake v%s", SNAKE_VERSION);
 
     if (headless) {
         /* Screenshots must not depend on whatever is in the player's save

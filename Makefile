@@ -16,6 +16,12 @@ SHOTS   := artifacts
 # screenshots use these; the geometry probes stay on Main (PLAN-THEMES.md 8).
 THEME_NAMES := main matrix original
 
+# Read, not transcribed: VERSION is the one place the version lives, and
+# CMakeLists.txt derives param.sfo's XX.YY from the same file. Only loop.c
+# needs it, so the define is scoped to that object below rather than added to
+# CFLAGS, where it would rebuild the world on every release.
+SNAKE_VERSION := $(shell cat VERSION)
+
 # Header dependencies. Without these, changing a struct in a header rebuilds
 # only some of its users and links objects that disagree about a layout - which
 # is not a build annoyance but a memory-corruption bug that looks like a game
@@ -62,6 +68,12 @@ $(BUILD)/core_%.o: src/core/%.c | $(BUILD)
 
 $(BUILD)/shell_%.o: src/shell/%.c | $(BUILD)
 	$(CC) $(CFLAGS) $(DEPFLAGS) $(SDL_CFLAGS) -c $< -o $@
+
+# The startup version line. The order-only prerequisite would not do here: a
+# changed VERSION has to recompile this object, or the binary keeps logging
+# the version it was built with last week.
+$(BUILD)/shell_loop.o: CFLAGS += -DSNAKE_VERSION='"$(SNAKE_VERSION)"'
+$(BUILD)/shell_loop.o: VERSION
 
 $(BUILD)/plat_desktop.o: src/platform/platform_desktop.c | $(BUILD)
 	$(CC) $(CFLAGS) $(DEPFLAGS) $(SDL_CFLAGS) -c $< -o $@
