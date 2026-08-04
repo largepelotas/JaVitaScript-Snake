@@ -341,7 +341,7 @@ linked. No Vita headers. Deterministic under a seeded RNG.
      Enumerate every legal transition in MECHANICS.md and assert illegal ones
      are unreachable in tests.
 
-     AMENDED 2026-07-31 (the maintainer): READY was added. The original has a distinct
+     AMENDED 2026-07-31 (maintainer): READY was added. The original has a distinct
      phase where the dialog is dismissed and the snake and food are placed and
      drawn, but nothing moves until the first direction press. Folding it into
      WELCOME draws the overlay over a live board; folding it into PLAYING starts
@@ -502,7 +502,7 @@ Vita-specific behavior is isolated in src/platform/platform_vita.c.
          Select              -> nothing in v1
      - Ship a hidden diagnostic: hold L+R at the welcome screen to display,
        on screen, the index of every button currently pressed, and log the
-       same to log.txt. the maintainer runs this once on hardware and reports the real
+       same to log.txt. The maintainer runs this once on hardware and reports the real
        indices; you then correct one table.
      - Do not hardcode indices you have not verified and do not present
        unverified indices as confirmed.
@@ -700,7 +700,7 @@ Do not skip Phase 3. It is the only phase that produces evidence.
 
        This is the binary's account of its own behavior, not an observation of
        hardware, so the item stays OPEN and the L+R diagnostic still ships.
-       the maintainer confirms once on device; a disagreement is a one-line fix to
+       The maintainer confirms once on device; a disagreement is a one-line fix to
        g_buttons in src/platform/platform_vita.c.
 
        CONFIRMED ON HARDWARE 2026-08-01 (Phase 6, TESTPLAN item 4), except
@@ -713,7 +713,7 @@ Do not skip Phase 3. It is the only phase that produces evidence.
        panel. Fixed the same day - buttons now only report while L+R are held
        (src/shell/input.c, tests/test_input.c).
 
-       the maintainer re-ran item 4 on the fixed build the same day: cross reports 2.
+       The maintainer re-ran item 4 on the fixed build the same day: cross reports 2.
        Every index the game binds is now observed on a device and matches what
        was read out of libSDL2.a, so the disassembly is vindicated and nothing
        in g_buttons changes. Item closed.

@@ -161,7 +161,7 @@ WSL. Install `ux0:` from the Vita3K UI, then drag `build-vita/snake.vpk` onto
 the window to install it. The WSL path is reachable from Windows Explorer at:
 
 ```
-\\wsl$\Ubuntu\home\user\vita-snake\build-vita\snake.vpk
+\\wsl$\Ubuntu\home\<user>\JaVitaScript-Snake\build-vita\snake.vpk
 ```
 
 Vita3K is for checking that the app boots, the LiveArea art is right, and the
