@@ -102,6 +102,11 @@ Grab `snake.vpk` from the [Releases page](../../releases) and install it with
 VitaShell. A new release is built automatically whenever a `vX.Y.Z` tag is
 pushed (see `.github/workflows/release-vita.yml`).
 
+The bubble reads **JaVitaScript Snake** — renamed from "Snake" in v1.1.2.
+Upgrading over an earlier build keeps the same title ID, so the install
+replaces it in place: one bubble, with the new label, and the highscore and
+theme in `ux0:data/VitaSnake/` untouched.
+
 ## Building
 
 ### Host (desktop, for development and testing)
@@ -140,6 +145,13 @@ game's own palette:
 ```sh
 make livearea
 ```
+
+The three images must be **8-bit indexed PNGs** (colour type 3). That is not a
+size optimisation: RGBA made VitaShell abort the install on hardware with
+`0x8010113D`, while Vita3K installed the same `.vpk` without complaint — so an
+emulator will not catch it. `icon0.png` is 128×128, `livearea/contents/bg.png`
+840×500, `livearea/contents/startup.png` 280×158. See the header of
+[`tools/gen_livearea.c`](tools/gen_livearea.c).
 
 ## On-device paths
 

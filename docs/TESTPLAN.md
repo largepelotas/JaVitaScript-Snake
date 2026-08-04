@@ -41,7 +41,14 @@ decide which you care about before deleting anything:
 
 Install the `.vpk` from VitaShell. Expect no error dialog, a bubble on the
 LiveArea, and — on opening the bubble — the startup image and background from
-`sce_sys/`, both drawn from the game's own palette.
+`sce_sys/`.
+
+The bubble must read **JaVitaScript Snake**, renamed from "Snake" in v1.1.2.
+Check this on a device that already had an earlier build: the title ID is
+unchanged, so the install replaces in place and the label updates — there must
+be exactly one bubble afterwards, not a second one beside the old. Then do item
+2 and confirm the highscore survived, which is the other half of the same
+claim: a rename is a label change, and `ux0:data/VitaSnake/` did not move.
 
 Expect: install succeeds; art is not black, not stretched, not the default
 homebrew placeholder.

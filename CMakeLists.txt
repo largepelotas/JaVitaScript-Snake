@@ -67,7 +67,16 @@ set(COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
 if(VITA)
   include("${VITASDK}/share/vita.cmake" REQUIRED)
 
-  set(VITA_APP_NAME "Snake")
+  # param.sfo's TITLE: the label under the LiveArea bubble and in Content
+  # Manager. Renamed from "Snake" in v1.1.2.
+  #
+  # Note what this is NOT tied to. VITA_TITLEID below and the ux0:data path in
+  # platform_vita.c are both independent of it, and both must stay put: a new
+  # title ID makes the firmware treat this as a different application - second
+  # bubble, the old one left behind - and a renamed data directory strands
+  # every existing highscore and theme. A rename is a label change and nothing
+  # more.
+  set(VITA_APP_NAME "JaVitaScript Snake")
   # Checked against all 1022 VitaDB homebrew entries and unused.
   # Changing it means touching this line and the ux0:app path in DEPLOY notes.
   set(VITA_TITLEID  "SNEK00001")

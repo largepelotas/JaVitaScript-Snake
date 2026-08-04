@@ -13,6 +13,13 @@ The title ID is `SNEK00001` and appears in exactly two places in this repo:
 `VITA_TITLEID` in `CMakeLists.txt` and the `ux0:app` paths here. It was checked
 against all 1022 VitaDB homebrew entries and is unused (PLAN.md 11.5).
 
+The title ID is not the displayed name and does not follow it. v1.1.2 renamed
+the bubble from "Snake" to **JaVitaScript Snake** by changing `VITA_APP_NAME`
+alone. Three things stayed put, deliberately: the title ID above, the `ux0:app`
+paths derived from it, and `ux0:data/VitaSnake/` in `platform_vita.c`. Changing
+the first two would make the firmware install a second application beside the
+old one; changing the third would strand every existing highscore and theme.
+
 ## 0. One-time setup on the Vita
 
 1. Install **VitaShell** (bubble, gives you a file manager and an FTP server).
