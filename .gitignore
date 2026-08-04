@@ -1,0 +1,93 @@
+# Ignore rules that need to travel with the repo, so a fresh clone on another
+# machine has the same guardrails this one does. Anything genuinely local to one
+# machine belongs in .git/info/exclude instead.
+#
+# NOTE: never add a bare `core` pattern here -- it would match src/core/ and
+# hide the entire game logic. Likewise no bare `*.patch`, which would hide the
+# tracked tools/vita-parse-core-py3.patch.
+
+# ---- Build trees --------------------------------------------------------
+# build-host/ is the Makefile's fast host loop; the CMake host build gets its
+# own directory so `make clean` cannot delete a CMake cache.
+build-host/
+build-cmake-host/
+build-vita/
+
+# In-tree CMake, if anyone ever configures without -B
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# ---- Build output, in case anything lands outside a build tree ----------
+*.o
+*.a
+*.d
+*.so
+*.exe
+*.out
+
+# Vita packaging output. The shipped .vpk is a release asset built by CI, never
+# a committed file.
+*.vpk
+*.velf
+*.self
+eboot.bin
+param.sfo
+
+# ---- Generated evidence -------------------------------------------------
+# Headless screenshots; regenerate with `make shots`
+artifacts/
+
+# Coverage / profiling
+*.gcda
+*.gcno
+*.gcov
+perf.data
+perf.data.old
+callgrind.out.*
+vgcore.*
+
+# Vita crash dumps (see tools/vita-parse-core-py3.patch)
+*.psp2dmp
+
+# Logs
+*.log
+log.txt
+
+# ---- Reference ----------------------------------------------------------
+# Upstream clone, fetched by scripts. Never modified, never vendored, and large
+# enough that committing it by accident is the mistake this file exists to stop.
+reference/
+
+# ---- Tooling ------------------------------------------------------------
+.claude/
+
+# ---- Editor / IDE noise -------------------------------------------------
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+.vs/
+*.sublime-workspace
+*.sublime-project
+tags
+.cache/
+.ccls-cache/
+compile_commands.json
+
+# ---- OS noise -----------------------------------------------------------
+.DS_Store
+._*
+Thumbs.db
+desktop.ini
+
+# ---- Patch / merge leftovers --------------------------------------------
+*.orig
+*.rej
+
+# ---- Secrets ------------------------------------------------------------
+.env
+.env.*
+*.pem
+*.key
