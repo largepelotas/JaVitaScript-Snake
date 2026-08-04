@@ -1,4 +1,4 @@
-# Plan: three themes, cycled with Triangle
+# Plan: themes, cycled with Triangle
 
 Post-v1 work. v1 shipped one theme because PLAN.md 0.6 fixed the scope, and the
 theme table was written as data specifically so this stays a data change
@@ -15,18 +15,24 @@ were both cut. §10 records what was decided and the measurements behind it.
 
 ## 1. Scope
 
-Three themes, in this order, cycled with Triangle on any screen:
+Themes come from two places, and the table records which:
 
-| Index | Name | Author | Reference stylesheet |
+| Index | Name | Author | Origin |
 |---|---|---|---|
 | 0 | Main | patorjk | `css/main-snake.css` (default, already shipped) |
 | 1 | Matrix | Geahad Haymor | `css/matrix-snake.css` |
 | 2 | Original | DylanLCrocker | `css/blue-snake.css` |
+| 3 | Vita | largepelotas | original to this port — §12 |
 
-The labels and authors are the reference's own, from the `THEMES` array at
-`reference/src/index.html:90-104`. "Original Theme by DylanLCrocker" maps to
-`blue-snake.css`, which is worth writing down because the filename does not say
-so.
+Indices 0–2 are **copied from the reference and credited to the people who
+contributed them there**. Their labels and authors are the reference's own,
+from the `THEMES` array at `reference/src/index.html:90-104`. "Original Theme
+by DylanLCrocker" maps to `blue-snake.css`, which is worth writing down because
+the filename does not say so.
+
+Index 3 is **original to this port, written by its developer**, and cites no
+stylesheet because there is none. §12 covers what that changes and what it does
+not.
 
 Out of scope: the other eleven themes in that fourteen-entry array — including
 Dark, cut in §10 — and the per-theme block artwork as artwork, see §3.
@@ -171,8 +177,10 @@ outputs, so the callers that do not care stay honest.
 
 ## 6. Attribution
 
-These are other people's contributions to an MIT project, and the reference
-credits each one by name in its dropdown. So should we:
+The copied themes are other people's contributions to an MIT project, and the
+reference credits each one by name in its dropdown. So should we. The original
+themes are credited by the same mechanism, so a player is told whose work they
+are looking at without having to know which kind it is:
 
 - `Theme` gains `const char *author`.
 - The welcome dialog's small credit block gains a second line:
@@ -206,9 +214,11 @@ Host-side, in the existing binaries:
 
 ## 8. Screenshots
 
-`make shots` gains a welcome and a playing shot per theme — six pictures for
-three themes — driven by the existing blessed replays with `--theme` added, so
-the pictures stay tied to runs the tests already verify.
+`make shots` gains a welcome, playing, paused and dead shot per theme — four
+pictures each, so the count grows with the table — driven by the existing
+blessed replays with `--theme` added, so the pictures stay tied to runs the
+tests already verify. Paused and dead are here because `pause_bg`, `pause_text`
+and `overlay_text_end` appear in no other frame.
 
 `tests/check_layout.sh` asserts geometry by probing pixels for specific colours
 (`0000A8` for the playfield, and so on). Those probes must keep running against
@@ -224,7 +234,7 @@ risk here.
   for flattened block art and Original's rounded food corners.
 - README.md — Controls (Triangle / `T`), the theme list with authors, and the
   save-data row.
-- TESTPLAN.md — one new item: cycle through all three themes on hardware, check
+- TESTPLAN.md — one new item: cycle through every theme on hardware, check
   each is legible on the device screen, and confirm the choice survives a
   relaunch.
 - PLAN.md 0.6 says v1 is fixed at one theme. This is post-v1, so 0.6 needs a
@@ -289,3 +299,66 @@ decided:
 Exit criteria: all three themes screenshotted and eyeballed, `make test` green
 including the new cases, replay hashes unchanged (proving the core never saw
 this), and the `.vpk` built.
+
+## 12. Original themes
+
+Added 2026-08-03, with Vita (index 3) as the first.
+
+Every theme before this one is a transcription: §2 cites the stylesheet line or
+the sampled pixel behind each colour, and that citation is the reason to believe
+the port rather than take its word. An original theme has no such line. The
+temptation is to give it one anyway — to invent a `vita-snake.css` and file it
+alongside the rest — and that is precisely the thing not to do. A reader who
+goes looking for that file must not find a plausible-looking lie.
+
+So the rule is:
+
+- **The colours are stated as chosen, not cited.** `render.c`'s table comment
+  for an original theme says so in as many words, and points here.
+- **The structure is borrowed, and the borrowing is cited.** Which selector
+  feeds which struct field is a solved problem for any theme already
+  transcribed, so an original theme reuses one of those mappings instead of
+  inventing a fourth. The cited line numbers name the *role* each colour plays
+  in the template, not its value.
+- **The credit line does not distinguish them.** `Vita theme by largepelotas`
+  reads exactly like `Matrix theme by Geahad Haymor`, because from the player's
+  side both are true and the difference is a provenance question, not a
+  gameplay one. §6's mechanism needed no change.
+
+### Vita
+
+Structure from `blue-snake.css`, already transcribed once as Original, so the
+mapping below is the proven one and only the colours are new.
+
+| Field | Value | Template line | Role |
+|---|---|---|---|
+| `background` | `#0B5FA5` | `:2` | LiveArea blue |
+| `playfield` | `#01203F` | `:59` | deep navy |
+| `snake` | `#FFFFFF` | `:41` | body block |
+| `snake_dead` | `#C0C0C0` | — | shared `deadblock.png`, as every theme |
+| `food` | `#E4373E` | `:53` | PlayStation red |
+| `hud_text` | `#FFFFFF` | `:26` | panel |
+| `overlay_bg` | `#000000` | `:64` | welcome background |
+| `overlay_text` | `#FFFFFF` | `:65` | welcome colour |
+| `overlay_text_end` | `#FFFFFF` | `:72` | try-again / win colour |
+| `pause_bg` | `#0B5FA5` | `:19` | body colour, as the template does |
+| `pause_text` | `#FFFFFF` | `:20` | |
+| `button_border` | `#FFFFFF` | — | |
+
+Measured on §10's method, against the values it published:
+
+| Pair | Vita | Best shipped | Worst shipped |
+|---|---|---|---|
+| snake / playfield | **16.41:1** | Main 12.26 | Original 3.29 |
+| food / playfield | **3.84:1** | Matrix 4.44 | Original 1.50 |
+| snake / food | 4.27:1 | Original 4.93 | Matrix 2.11 |
+
+An original theme has no author to be faithful to, so nothing argues for
+shipping one that measures badly — §10 cut Dark at 1.23:1 and only faithfulness
+had spoken for it. Vita clears every pair.
+
+Two numbers §10 never took, recorded here because taking them turned something
+up: it measured the snake alone, and **Original's food sits at 1.50:1 against
+its own playfield** — below the 1.23:1 that cut Dark. It is faithful to
+`blue-snake.css:53` and `:59`, so it stays; but a future original theme has no
+such defence and should clear both pairs.

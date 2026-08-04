@@ -14,7 +14,7 @@ SHOTS   := artifacts
 
 # Theme names in table order (src/shell/render.c). Only the per-theme
 # screenshots use these; the geometry probes stay on Main (PLAN-THEMES.md 8).
-THEME_NAMES := main matrix original
+THEME_NAMES := main matrix original vita
 
 # Read, not transcribed: VERSION is the one place the version lives, and
 # CMakeLists.txt derives param.sfo's XX.YY from the same file. Only loop.c

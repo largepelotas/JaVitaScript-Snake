@@ -41,7 +41,7 @@ static void test_table_is_complete(void)
 
     banner("every theme has a name and an author");
 
-    CHECK(theme_count() == 3, "expected three themes, got %d", theme_count());
+    CHECK(theme_count() == 4, "expected four themes, got %d", theme_count());
 
     for (i = 0; i < theme_count(); i++) {
         const Theme *t = theme_get(i);
@@ -82,6 +82,9 @@ static void test_main_is_index_zero(void)
     CHECK(strcmp(theme_get(THEME_ORIGINAL)->name, "Original") == 0,
           "THEME_ORIGINAL should name original, got '%s'",
           theme_get(THEME_ORIGINAL)->name);
+    CHECK(strcmp(theme_get(THEME_VITA)->name, "Vita") == 0,
+          "THEME_VITA should name vita, got '%s'",
+          theme_get(THEME_VITA)->name);
 }
 
 static void test_get_clamps(void)

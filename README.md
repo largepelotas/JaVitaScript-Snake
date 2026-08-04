@@ -25,20 +25,34 @@ The choice persists across launches.
 
 ## Themes
 
-Three of the reference's contributed themes, cycled with Triangle (Vita) or T
-(desktop) on any screen — not just the welcome one, which matches the original,
-where changing the theme swaps the stylesheet mid-game. The choice persists.
+Cycled with Triangle (Vita) or T (desktop) on any screen — not just the welcome
+one, which matches the original, where changing the theme swaps the stylesheet
+mid-game. The choice persists.
 
-| Theme | Author | Reference stylesheet |
+Themes come from two places, and the difference is worth keeping straight.
+Most are **copied from the original website and credited to the people who
+contributed them there**; the rest are **original to this port, written by its
+developer**. The welcome dialog names the theme's author either way, so a
+player always sees whose work they are looking at.
+
+| Theme | Author | Origin |
 |---|---|---|
 | Main | patorjk | `main-snake.css` (the original's default) |
 | Matrix | Geahad Haymor | `matrix-snake.css` |
 | Original | DylanLCrocker | `blue-snake.css` |
+| Vita | largepelotas | original to this port |
 
-Names and authors are the reference's own, from its theme dropdown. Every colour
-was read out of the stylesheet or sampled from the block image rather than
-chosen — the table with citations is in
-[`docs/MECHANICS.md`](docs/MECHANICS.md) §8.6.
+For the copied themes, the names and authors are the reference's own, taken
+from its theme dropdown, and every colour was read out of the stylesheet or
+sampled from the block image rather than chosen — the table with citations is
+in [`docs/MECHANICS.md`](docs/MECHANICS.md) §8.6.
+
+The original themes cite no stylesheet, because there is none to cite. They
+borrow an existing theme's *structure* — which selector feeds which field — so
+the mapping stays one that has already been proven, and only the colours are
+new. Vita is built on `blue-snake.css`'s structure, the same one Original was
+transcribed from. Its rationale and measurements are in
+[`docs/PLAN-THEMES.md`](docs/PLAN-THEMES.md) §12.
 
 ## Controls
 
@@ -75,11 +89,12 @@ Player-visible differences:
   Cross to start, START to pause.
 - **Difficulty persists.** The original does not remember the choice across a
   reload; saving it is a handheld affordance.
-- **Three themes, not fourteen**, and their block artwork is flattened to one
-  colour per element rather than tiled with the original's textured images.
-  Dark is deliberately absent: flattening its tile leaves its snake at a 1.23:1
-  contrast ratio against its own playfield, which is not playable on a handheld
-  screen. See [`docs/MECHANICS.md`](docs/MECHANICS.md) §8.6.
+- **Three of the original's fourteen themes, plus one this port added**, and
+  the copied ones have their block artwork flattened to one colour per element
+  rather than tiled with the original's textured images. Dark is deliberately
+  absent: flattening its tile leaves its snake at a 1.23:1 contrast ratio
+  against its own playfield, which is not playable on a handheld screen. See
+  [`docs/MECHANICS.md`](docs/MECHANICS.md) §8.6.
 
 ## Installing (no build required)
 

@@ -103,6 +103,7 @@ check_theme() {
 check_theme main     0000A8     FC5454      000000
 check_theme matrix   000000     00FF11      000000
 check_theme original 149C36     004620      004620
+check_theme vita     01203F     0B5FA5      0B5FA5
 
 if [ "$fail" -ne 0 ]; then
     echo "layout checks FAILED"

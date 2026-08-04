@@ -313,8 +313,8 @@ The log is flushed after every line, so even a lock-up leaves one worth reading.
 
 New in the themes build. Press **Triangle** on the welcome screen: the line
 `Theme: Main - TRIANGLE to change` should advance Main → Matrix → Original →
-Main, the whole screen should recolour with it, and the credit line under the
-MIT one should change to name that theme's author.
+Vita → Main, the whole screen should recolour with it, and the credit line under
+the MIT one should change to name that theme's author.
 
 Then start a game and press Triangle **while the snake is moving**. Unlike
 Square, this is meant to work mid-game — the original swaps its stylesheet live

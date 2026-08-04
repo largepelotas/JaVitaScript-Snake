@@ -49,6 +49,7 @@ typedef struct {
 #define THEME_MAIN     0
 #define THEME_MATRIX   1
 #define THEME_ORIGINAL 2
+#define THEME_VITA     3
 
 int          theme_count(void);
 const Theme *theme_get(int index); /* clamped; never returns NULL */

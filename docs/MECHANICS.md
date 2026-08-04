@@ -503,6 +503,11 @@ The reference builds a dropdown from a fourteen-entry `THEMES` array
 stylesheet. This port carries three of them, cycled with Triangle on any screen.
 The labels and authors below are the reference's own.
 
+This document specifies the original, so only the copied themes appear here.
+The port also ships themes of its own, which have no stylesheet to cite and are
+therefore not part of this specification — see `PLAN-THEMES.md` §12. Nothing
+below changes because they exist.
+
 | Index | Name | Author | Stylesheet |
 |---|---|---|---|
 | 0 | Main | patorjk | `css/main-snake.css` (the original's default) |

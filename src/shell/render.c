@@ -156,6 +156,34 @@ static const Theme g_themes[] = {
         RGB(0x00, 0x46, 0x20), /* pause_bg      :19 not black           */
         RGB(0xFF, 0xFF, 0xFF), /* pause_text    :20                     */
         RGB(0xFF, 0xFF, 0xFF)  /* button_border                         */
+    },
+    /*
+     * The first theme with no stylesheet behind it. The three above are
+     * transcriptions and every column cites the line it came from; this one is
+     * original to this port, so its citation is PLAN-THEMES.md 12 and nothing
+     * else. It is recorded that way rather than dressed up as a fourth
+     * transcription, because a reader who goes looking for vita-snake.css must
+     * not find a plausible-looking lie.
+     *
+     * What is borrowed is the structure: which selector feeds which field is
+     * blue-snake.css's, already transcribed once as Original, so the mapping
+     * below is the proven one and only the colours are new. The cited lines are
+     * that file's, naming the role each colour plays, not its value.
+     */
+    {
+        "Vita", "largepelotas",
+        RGB(0x0B, 0x5F, 0xA5), /* background    :2  LiveArea blue       */
+        RGB(0x01, 0x20, 0x3F), /* playfield     :59 deep navy           */
+        RGB(0xFF, 0xFF, 0xFF), /* snake         :41 body block          */
+        RGB(0xC0, 0xC0, 0xC0), /* snake_dead    shared deadblock.png    */
+        RGB(0xE4, 0x37, 0x3E), /* food          :53 PlayStation red     */
+        RGB(0xFF, 0xFF, 0xFF), /* hud_text      :26 panel               */
+        RGB(0x00, 0x00, 0x00), /* overlay_bg    :64 welcome background  */
+        RGB(0xFF, 0xFF, 0xFF), /* overlay_text  :65 welcome color       */
+        RGB(0xFF, 0xFF, 0xFF), /* ..._text_end  :72 try-again/win color */
+        RGB(0x0B, 0x5F, 0xA5), /* pause_bg      :19 body colour, as blue*/
+        RGB(0xFF, 0xFF, 0xFF), /* pause_text    :20                     */
+        RGB(0xFF, 0xFF, 0xFF)  /* button_border                         */
     }
 };
 
