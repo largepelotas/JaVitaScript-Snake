@@ -12,6 +12,10 @@ CFLAGS  ?= -std=c99 -Wall -Wextra -Wpedantic -Wshadow -Wconversion \
 BUILD   := build-host
 SHOTS   := artifacts
 
+# Theme names in table order (src/shell/render.c). Only the per-theme
+# screenshots use these; the geometry probes stay on Main (PLAN-THEMES.md 8).
+THEME_NAMES := main matrix original
+
 # Header dependencies. Without these, changing a struct in a header rebuilds
 # only some of its users and links objects that disagree about a layout - which
 # is not a build annoyance but a memory-corruption bug that looks like a game
@@ -39,10 +43,12 @@ SCRIPT_OBJ := $(BUILD)/shell_script.o
 
 all: $(BUILD)/test_core $(BUILD)/replay $(BUILD)/snake
 
-test: $(BUILD)/test_core $(BUILD)/test_input $(BUILD)/test_score $(BUILD)/replay
+test: $(BUILD)/test_core $(BUILD)/test_input $(BUILD)/test_score \
+      $(BUILD)/test_render $(BUILD)/replay
 	@$(BUILD)/test_core
 	@$(BUILD)/test_input
 	@$(BUILD)/test_score
+	@$(BUILD)/test_render
 	@bash tests/run_replays.sh $(BUILD)/replay
 
 $(BUILD):
@@ -72,6 +78,9 @@ $(BUILD)/test_input.o: tests/test_input.c | $(BUILD)
 $(BUILD)/test_score.o: tests/test_score.c | $(BUILD)
 	$(CC) $(CFLAGS) $(DEPFLAGS) $(SDL_CFLAGS) -c $< -o $@
 
+$(BUILD)/test_render.o: tests/test_render.c | $(BUILD)
+	$(CC) $(CFLAGS) $(DEPFLAGS) $(SDL_CFLAGS) -c $< -o $@
+
 $(BUILD)/test_replay.o: tests/replay.c | $(BUILD)
 	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
 
@@ -91,8 +100,16 @@ $(BUILD)/test_input: $(BUILD)/test_input.o $(BUILD)/shell_input.o $(PLAT_OBJ) \
 # The save record is the only state that outlives the process, so it is tested
 # through the real platform layer against a redirected XDG_DATA_HOME rather than
 # against a stub (tests/test_score.c).
-$(BUILD)/test_score: $(BUILD)/test_score.o $(BUILD)/shell_score.o $(PLAT_OBJ) \
+$(BUILD)/test_score: $(BUILD)/test_score.o $(BUILD)/shell_score.o \
+                     $(BUILD)/shell_render.o $(BUILD)/shell_text.o $(PLAT_OBJ) \
                      $(CORE_OBJ)
+	$(CC) $(CFLAGS) $^ -o $@ $(SDL_LIBS)
+
+# The theme table is data, so this only has to prove the data is well-formed and
+# that the two functions over it stay in range (PLAN-THEMES.md 7). It links the
+# real render.c rather than a copy of the table.
+$(BUILD)/test_render: $(BUILD)/test_render.o $(BUILD)/shell_render.o \
+                      $(BUILD)/shell_text.o $(PLAT_OBJ) $(CORE_OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(SDL_LIBS)
 
 $(BUILD)/replay: $(BUILD)/test_replay.o $(SCRIPT_OBJ) $(CORE_OBJ)
@@ -146,10 +163,26 @@ shots: $(BUILD)/snake $(BUILD)/bmp2png $(BUILD)/pixel_probe
 	$(BUILD)/snake --headless --outdir $(SHOTS) \
 	    --script tests/replays/01_straight_run.txt \
 	    --shot diagnostic@0 --diag 0x34
+	@# One welcome, playing, paused and dead per theme (PLAN-THEMES.md 8),
+	@# from the same blessed scripts as the Main shots above. paused and dead
+	@# are here because pause_bg, pause_text and overlay_text_end appear in no
+	@# other frame - a welcome-and-playing pair would not show them at all.
+	@for t in $(THEME_NAMES); do \
+	    $(BUILD)/snake --headless --outdir $(SHOTS) --theme $$t \
+	        --script tests/replays/01_straight_run.txt \
+	        --shot theme_$${t}_welcome@0 --shot theme_$${t}_dead@999999 \
+	        || exit 1; \
+	    $(BUILD)/snake --headless --outdir $(SHOTS) --theme $$t \
+	        --script tests/replays/03_pause_resume.txt \
+	        --shot theme_$${t}_paused@21 || exit 1; \
+	    $(BUILD)/snake --headless --outdir $(SHOTS) --theme $$t \
+	        --script tests/shots/long_snake.txt \
+	        --shot theme_$${t}_playing@1035 || exit 1; \
+	done
 	@for b in $(SHOTS)/*.bmp; do \
 	    $(BUILD)/bmp2png $$b $${b%.bmp}.png || exit 1; \
 	done
-	@tests/check_layout.sh $(BUILD)/pixel_probe $(SHOTS)
+	@bash tests/check_layout.sh $(BUILD)/pixel_probe $(SHOTS)
 	@ls -1 $(SHOTS)/*.png
 
 # Proves the SDL shell drives the core to the same state the core-only harness

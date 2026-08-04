@@ -34,7 +34,8 @@ typedef enum {
     PAD_CONFIRM,    /* Cross  */
     PAD_BACK,       /* Circle */
     PAD_PAUSE,      /* Start  */
-    PAD_CYCLE_MODE, /* Square: next difficulty on the welcome screen */
+    PAD_CYCLE_MODE,  /* Square: next difficulty on the welcome screen */
+    PAD_CYCLE_THEME, /* Triangle: next theme, on any screen            */
     PAD_L,
     PAD_R,
     PAD_COUNT

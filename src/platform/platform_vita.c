@@ -70,9 +70,10 @@ static const int g_buttons[PAD_COUNT] = {
     2,  /* PAD_CONFIRM    - cross  */
     1,  /* PAD_BACK       - circle */
     11, /* PAD_PAUSE      - start  */
-    3,  /* PAD_CYCLE_MODE - square */
-    4,  /* PAD_L          - L1     */
-    5   /* PAD_R          - R1     */
+    3,  /* PAD_CYCLE_MODE  - square   */
+    0,  /* PAD_CYCLE_THEME - triangle */
+    4,  /* PAD_L           - L1       */
+    5   /* PAD_R           - R1       */
 };
 
 void plat_init(void)

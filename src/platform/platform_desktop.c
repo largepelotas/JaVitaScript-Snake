@@ -36,9 +36,10 @@ static const int g_buttons[PAD_COUNT] = {
     0,  /* PAD_CONFIRM    - A */
     1,  /* PAD_BACK       - B */
     7,  /* PAD_PAUSE      - Start */
-    2,  /* PAD_CYCLE_MODE - X, which sits where the Vita's square does */
-    4,  /* PAD_L          - left shoulder  */
-    5   /* PAD_R          - right shoulder */
+    2,  /* PAD_CYCLE_MODE  - X, which sits where the Vita's square does */
+    3,  /* PAD_CYCLE_THEME - Y, which sits where the Vita's triangle does */
+    4,  /* PAD_L           - left shoulder  */
+    5   /* PAD_R           - right shoulder */
 };
 
 void plat_init(void)

@@ -80,6 +80,30 @@ run "$DIR/paused.bmp" \
     "629,311=000000:pause box bottom-right" \
     "329,232=0000A8:one pixel left of the pause box is field"
 
+# --- Per-theme spot checks (PLAN-THEMES.md 8) -----------------------------
+# Deliberately not the geometry table above: that stays on Main, because a
+# second copy per theme would cost maintenance and buy no extra confidence.
+# The risk these catch is a mis-transcribed row in the theme table, so they
+# probe one pixel per field that a row can get wrong, reusing coordinates the
+# Main checks already established as playfield, HUD strip and pause box.
+#
+# pause_bg is checked because it is a field this port added: draw_paused used
+# to borrow overlay_bg, which is right for Main and wrong for Original.
+check_theme() {
+    name="$1" playfield="$2" background="$3" pause_bg="$4"
+
+    run "$DIR/theme_${name}_playing.bmp" \
+        "939,499=$playfield:$name playfield" \
+        "480,510=$background:$name HUD strip is background"
+    run "$DIR/theme_${name}_paused.bmp" \
+        "330,232=$pause_bg:$name pause box"
+}
+
+#          name      playfield  background  pause_bg
+check_theme main     0000A8     FC5454      000000
+check_theme matrix   000000     00FF11      000000
+check_theme original 149C36     004620      004620
+
 if [ "$fail" -ne 0 ]; then
     echo "layout checks FAILED"
     exit 1

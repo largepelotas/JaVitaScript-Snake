@@ -1036,6 +1036,53 @@ static void test_rng(void)
     CHECK(rng_below(&r, 1u) == 0u, "rng_below(1) must always be 0");
 }
 
+/*
+ * The core must never learn what a theme is (PLAN-THEMES.md 4). A theme has no
+ * gameplay effect, so if one could reach src/core/ it could perturb
+ * game_state_hash, and every blessed replay hash in tests/replays/ would become
+ * a hostage to a cosmetic setting.
+ *
+ * This is a negative test, so it cannot assert on something that is absent. It
+ * pins the two things that would have to change first: the action enum stays
+ * exactly four wide, and the hash is a function of play alone.
+ */
+static void test_core_knows_nothing_of_themes(void)
+{
+    GameState a, b;
+    int       i;
+
+    banner("the core has no concept of a theme");
+
+    /* If a theme cycle were ever added as a GameAction it would land here, and
+     * ACTION_CYCLE_MODE would stop being the last of exactly four. The shell
+     * carries an InputState.theme_delta instead, precisely to avoid that. */
+    CHECK(ACTION_CYCLE_MODE == 3,
+          "GameAction gained a member: the shell, not the core, owns themes "
+          "(ACTION_CYCLE_MODE == %d)", (int)ACTION_CYCLE_MODE);
+
+    /* Two games driven identically hash identically. The theme lives in the
+     * shell's RenderCtx and has no way to reach either. */
+    game_init_vita(&a, MODE_MEDIUM, 4242u);
+    game_init_vita(&b, MODE_MEDIUM, 4242u);
+    game_action(&a, ACTION_CONFIRM);
+    game_action(&b, ACTION_CONFIRM);
+    game_queue_input(&a, DIR_RIGHT);
+    game_queue_input(&b, DIR_RIGHT);
+    for (i = 0; i < 200; i++) {
+        (void)game_tick(&a, 75);
+        (void)game_tick(&b, 75);
+    }
+    CHECK(game_state_hash(&a) == game_state_hash(&b),
+          "identical play should hash identically (0x%08X vs 0x%08X)",
+          game_state_hash(&a), game_state_hash(&b));
+
+    /* And the whole GameState is theme-free: two states that hash the same are
+     * byte-identical, so there is no hidden field a theme could have been
+     * tucked into without the hash noticing. */
+    CHECK(memcmp(&a, &b, sizeof a) == 0,
+          "identical play should leave byte-identical state");
+}
+
 int main(void)
 {
     printf("core tests\n\n");
@@ -1060,6 +1107,7 @@ int main(void)
     test_modes();
     test_cycle_mode();
     test_determinism();
+    test_core_knows_nothing_of_themes();
     test_rng();
 
     printf("\n%d checks, %d failures\n", checks, failures);

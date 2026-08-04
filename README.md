@@ -23,6 +23,23 @@ not to guesswork.
 Cycle difficulty on the welcome screen with Square (Vita) or M / Tab (desktop).
 The choice persists across launches.
 
+## Themes
+
+Three of the reference's contributed themes, cycled with Triangle (Vita) or T
+(desktop) on any screen — not just the welcome one, which matches the original,
+where changing the theme swaps the stylesheet mid-game. The choice persists.
+
+| Theme | Author | Reference stylesheet |
+|---|---|---|
+| Main | patorjk | `main-snake.css` (the original's default) |
+| Matrix | Geahad Haymor | `matrix-snake.css` |
+| Original | DylanLCrocker | `blue-snake.css` |
+
+Names and authors are the reference's own, from its theme dropdown. Every colour
+was read out of the stylesheet or sampled from the block image rather than
+chosen — the table with citations is in
+[`docs/MECHANICS.md`](docs/MECHANICS.md) §8.6.
+
 ## Controls
 
 | Action | Vita | Desktop |
@@ -32,6 +49,7 @@ The choice persists across launches.
 | Pause | START | P or Escape |
 | Back to welcome screen | Circle | Backspace or X |
 | Cycle difficulty (welcome only) | Square | M or Tab |
+| Cycle theme (any screen) | Triangle | T |
 | Quit | — | Q, or close the window |
 
 ## Known deviations from the original
@@ -57,6 +75,11 @@ Player-visible differences:
   Cross to start, START to pause.
 - **Difficulty persists.** The original does not remember the choice across a
   reload; saving it is a handheld affordance.
+- **Three themes, not fourteen**, and their block artwork is flattened to one
+  colour per element rather than tiled with the original's textured images.
+  Dark is deliberately absent: flattening its tile leaves its snake at a 1.23:1
+  contrast ratio against its own playfield, which is not playable on a handheld
+  screen. See [`docs/MECHANICS.md`](docs/MECHANICS.md) §8.6.
 
 ## Installing (no build required)
 
@@ -72,9 +95,10 @@ Requires SDL2 and SDL2_ttf via `pkg-config`.
 
 ```sh
 make            # build core tests, replay harness, and the desktop binary
-make test       # run unit tests, input tests, save-record tests, and replays
-./build-host/snake                   # play on the saved difficulty
+make test       # run unit, input, save-record, theme-table tests, and replays
+./build-host/snake                   # play on the saved difficulty and theme
 ./build-host/snake --mode medium     # override for this session only
+./build-host/snake --theme matrix    # likewise; not written back to the save
 make shots      # headless screenshots into artifacts/, with pixel assertions
 make parity     # run replay scripts through the SDL shell and check hashes
 ```
@@ -106,7 +130,7 @@ make livearea
 
 | What | Path |
 |---|---|
-| Save data (highscore + difficulty) | `ux0:data/VitaSnake/highscore.dat` |
+| Save data (highscore + difficulty + theme) | `ux0:data/VitaSnake/highscore.dat` |
 | Log | `ux0:data/VitaSnake/log.txt` |
 | Bundled font | `app0:assets/font.ttf` |
 

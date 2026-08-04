@@ -21,10 +21,17 @@
 
 /*
  * Theme table (PLAN.md 0.6: themes must be data, so adding one later is a data
- * change). v1 ships the main theme only.
+ * change). Every value comes from a reference stylesheet or a sampled block
+ * image, cited per column in PLAN-THEMES.md 2.
+ *
+ * The reference styles the pause screen separately from the welcome and
+ * end-game dialogs, and the three disagree, so they get their own fields rather
+ * than sharing overlay_*. Main is the same colour in all three, which is why
+ * v1 could borrow one for the others (PLAN-THEMES.md 3).
  */
 typedef struct {
     const char *name;
+    const char *author;         /* credited in the welcome dialog */
     SDL_Color   background;     /* outside the playfield  */
     SDL_Color   playfield;
     SDL_Color   snake;
@@ -32,14 +39,27 @@ typedef struct {
     SDL_Color   food;
     SDL_Color   hud_text;
     SDL_Color   overlay_bg;
-    SDL_Color   overlay_text;
+    SDL_Color   overlay_text;   /* welcome dialog          */
+    SDL_Color   overlay_text_end; /* death and win dialogs */
+    SDL_Color   pause_bg;
+    SDL_Color   pause_text;
     SDL_Color   button_border;
 } Theme;
 
-#define THEME_MAIN 0
+#define THEME_MAIN     0
+#define THEME_MATRIX   1
+#define THEME_ORIGINAL 2
 
 int          theme_count(void);
 const Theme *theme_get(int index); /* clamped; never returns NULL */
+
+/*
+ * Advances `index` by `delta` and wraps, which is how the loop consumes
+ * InputState.theme_delta. Here rather than in the loop so the wrap is testable
+ * without a window, and so the table stays the only thing that knows how many
+ * themes there are.
+ */
+int theme_advance(int index, int delta);
 
 typedef struct {
     TextFont *font;  /* 14px, the original's body size            */
