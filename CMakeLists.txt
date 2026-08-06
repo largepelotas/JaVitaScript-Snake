@@ -130,6 +130,17 @@ if(VITA)
          sce_sys/livearea/contents/template.xml
     FILE ${CMAKE_CURRENT_SOURCE_DIR}/assets/font.ttf assets/font.ttf
     FILE ${CMAKE_CURRENT_SOURCE_DIR}/assets/font-LICENSE.txt assets/font-LICENSE.txt
+    # All three licenses this build redistributes under, carried in the vpk
+    # rather than left behind in the repository. MIT and the Bitstream Vera
+    # Fonts Copyright both require their notice to accompany redistributions,
+    # and a vpk handed between people is a redistribution that arrives with no
+    # repository attached. 2 KB in a 1.6 MB package.
+    #
+    # Nothing reads these: plat_asset_path opens assets by name and the game
+    # only ever asks for font.ttf, so adding files here cannot affect runtime.
+    FILE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE assets/LICENSE.txt
+    FILE ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScript-Snake-LICENSE
+         assets/JavaScript-Snake-LICENSE.txt
   )
 else()
   find_package(PkgConfig REQUIRED)
