@@ -55,8 +55,9 @@ This step is only needed once, and again whenever the LiveArea assets or
 
 That is the LiveArea PNGs, not the build. The firmware only accepts **8-bit
 indexed** (colour type 3) images in `sce_sys/`; truecolour ones install fine in
-Vita3K and then fail on hardware at the end of the copy. `make livearea`
-already produces indexed PNGs. To check any image before packaging it:
+Vita3K and then fail on hardware at the end of the copy. The checked-in images
+are indexed already; the trap is replacing one with an RGBA export. To check
+any image before packaging it:
 
 ```sh
 python3 -c 'import struct,sys; d=open(sys.argv[1],"rb").read(26); \

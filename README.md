@@ -139,19 +139,14 @@ The CMake file also drives the host build:
 cmake -B build-cmake-host && cmake --build build-cmake-host
 ```
 
-LiveArea artwork is checked in under `sce_sys/`. To regenerate it from the
-game's own palette:
-
-```sh
-make livearea
-```
-
-The three images must be **8-bit indexed PNGs** (colour type 3). That is not a
-size optimisation: RGBA made VitaShell abort the install on hardware with
-`0x8010113D`, while Vita3K installed the same `.vpk` without complaint — so an
-emulator will not catch it. `icon0.png` is 128×128, `livearea/contents/bg.png`
-840×500, `livearea/contents/startup.png` 280×158. See the header of
-[`tools/gen_livearea.c`](tools/gen_livearea.c).
+LiveArea artwork is hand-made and checked in under `sce_sys/`. Replacing it is
+a matter of dropping in new files, but they must be **8-bit indexed PNGs**
+(colour type 3). That is not a size optimisation: RGBA made VitaShell abort the
+install on hardware with `0x8010113D`, while Vita3K installed the same `.vpk`
+without complaint — so an emulator will not catch it. `icon0.png` is 128×128,
+`livearea/contents/bg.png` 840×500, `livearea/contents/startup.png` 280×158.
+[`docs/DEPLOY.md`](docs/DEPLOY.md) has a one-liner that checks an image before
+you package it.
 
 ## On-device paths
 
