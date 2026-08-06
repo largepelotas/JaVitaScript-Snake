@@ -203,8 +203,19 @@ buttons are probed only — no game actions fire.
 
 ## License
 
-The original's MIT license is at `third_party/JavaScript-Snake-LICENSE` and
-covers the gameplay design this port derives from.
+This port is **MIT licensed** — see [`LICENSE`](LICENSE). That covers what is
+original here: the C implementation in `src/`, the tests and tools, the
+documentation in `docs/`, and the Vita theme.
 
-The bundled font (`assets/font.ttf`) is DejaVu Sans, unmodified, under the
-Bitstream Vera Fonts Copyright — see `assets/font-LICENSE.txt`.
+Two components come from elsewhere and keep their own licenses:
+
+- **The original *JavaScript Snake*** by Patrick Gillespie, MIT licensed,
+  covering the gameplay design this port derives from and the three themes
+  copied from it. Its license is at
+  [`third_party/JavaScript-Snake-LICENSE`](third_party/JavaScript-Snake-LICENSE)
+  and must travel with any redistribution.
+- **The bundled font** (`assets/font.ttf`), DejaVu Sans, unmodified, under the
+  Bitstream Vera Fonts Copyright — see `assets/font-LICENSE.txt`.
+
+All three are permissive and mutually compatible, so the `.vpk` as a whole is
+free to use, modify and redistribute provided the three notices are kept.
