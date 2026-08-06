@@ -45,7 +45,7 @@ MAIN_OBJ  := $(BUILD)/main.o
 # is pure C99 and links without SDL.
 SCRIPT_OBJ := $(BUILD)/shell_script.o
 
-.PHONY: all test shots parity livearea clean
+.PHONY: all test shots parity clean
 
 all: $(BUILD)/test_core $(BUILD)/replay $(BUILD)/snake
 
@@ -136,12 +136,6 @@ $(BUILD)/bmp2png: $(BUILD)/tool_bmp2png.o
 $(BUILD)/pixel_probe: $(BUILD)/tool_pixel_probe.o
 	$(CC) $(CFLAGS) $^ -o $@
 
-# zlib, not SDL2_image: IMG_SavePNG only writes truecolour PNGs, and the Vita
-# firmware rejects those in sce_sys (see the header of tools/gen_livearea.c),
-# so the tool deflates and writes the indexed PNG itself.
-$(BUILD)/gen_livearea: $(BUILD)/tool_gen_livearea.o
-	$(CC) $(CFLAGS) $^ -o $@ $(SDL_LIBS) -lz $(SDL_LIBS)
-
 $(BUILD)/gen_shot_script: $(BUILD)/tool_gen_shot_script.o $(CORE_OBJ)
 	$(CC) $(CFLAGS) $^ -o $@
 
@@ -203,12 +197,6 @@ parity: $(BUILD)/snake
 	@for s in tests/replays/*.txt; do \
 	    $(BUILD)/snake --headless --script $$s --outdir $(SHOTS) || exit 1; \
 	done
-
-# The LiveArea images (PLAN.md 7.3). Unlike shots/, the output is checked in -
-# these are shipped assets, not evidence - so this target is run by hand when
-# the motif changes, not as part of a build.
-livearea: $(BUILD)/gen_livearea
-	$(BUILD)/gen_livearea sce_sys assets/font.ttf
 
 clean:
 	rm -rf $(BUILD)
